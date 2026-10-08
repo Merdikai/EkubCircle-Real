@@ -77,7 +77,7 @@ try {
 
     # 7. Get Current Round
     Write-Host "`n5. Testing Round Engine & Pot Tracking..." -ForegroundColor Yellow
-    $currRound = Invoke-RestMethod -Uri "$BaseUrl/api/rounds/current?circleId=$circleId" -Method Get -Headers $headers
+    $currRound = Invoke-RestMethod -Uri "$BaseUrl/api/circles/$circleId/rounds/current" -Method Get -Headers $headers
     $roundId = $currRound.roundId
     Assert-Equal $currRound.roundNumber 1 "Round 1 is currently Open"
     Assert-Equal $currRound.paidCount 0 "Initial paid count is 0"
@@ -139,7 +139,7 @@ try {
     Invoke-RestMethod -Uri "$BaseUrl/api/payments" -Method Post -Headers $headers -Body $payBody3 -ContentType "application/json" | Out-Null
 
     # 10. Check Round is Ready for Payout
-    $currRoundReady = Invoke-RestMethod -Uri "$BaseUrl/api/rounds/current?circleId=$circleId" -Method Get -Headers $headers
+    $currRoundReady = Invoke-RestMethod -Uri "$BaseUrl/api/circles/$circleId/rounds/current" -Method Get -Headers $headers
     Assert-Equal $currRoundReady.paidCount 3 "All 3 members contributed"
     Assert-Equal $currRoundReady.currentPotAmount 7500 "Pot amount is 7,500 ETB"
     Assert-Equal $currRoundReady.isReadyForPayout $true "Round is Ready for Payout"
@@ -162,7 +162,7 @@ try {
 
     # 13. Test Extra Credit Feature: Server-Side Fair Draw Simulator
     Write-Host "`n9. Testing Extra Credit: Server-Side Fair Draw Simulator..." -ForegroundColor Yellow
-    $round2 = Invoke-RestMethod -Uri "$BaseUrl/api/rounds/current?circleId=$circleId" -Method Get -Headers $headers
+    $round2 = Invoke-RestMethod -Uri "$BaseUrl/api/circles/$circleId/rounds/current" -Method Get -Headers $headers
     $round2Id = $round2.roundId
     Assert-Equal $round2.roundNumber 2 "Current round is Round 2"
 

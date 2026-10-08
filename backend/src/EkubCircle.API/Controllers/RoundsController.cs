@@ -38,8 +38,14 @@ public class RoundsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetCurrentRound(int circleId)
+    public async Task<IActionResult> GetCurrentRound(
+        [FromRoute(Name = "circleId")] int? routeCircleId,
+        [FromQuery(Name = "circleId")] int? queryCircleId)
     {
+        var circleId = (routeCircleId.HasValue && routeCircleId.Value > 0)
+            ? routeCircleId.Value
+            : (queryCircleId ?? 0);
+
         if (circleId <= 0)
         {
             return BadRequest(new { message = "Valid circleId is required." });
@@ -75,8 +81,14 @@ public class RoundsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetCircleRounds(int circleId)
+    public async Task<IActionResult> GetCircleRounds(
+        [FromRoute(Name = "circleId")] int? routeCircleId,
+        [FromQuery(Name = "circleId")] int? queryCircleId)
     {
+        var circleId = (routeCircleId.HasValue && routeCircleId.Value > 0)
+            ? routeCircleId.Value
+            : (queryCircleId ?? 0);
+
         if (circleId <= 0)
         {
             return BadRequest(new { message = "Valid circleId is required." });
