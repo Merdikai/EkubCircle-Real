@@ -247,9 +247,10 @@ try {
     Write-Host "`n12. Testing Extensions: In-App Notifications..." -ForegroundColor Yellow
     $m3Notifications = Invoke-RestMethod -Uri "$BaseUrl/api/notifications" -Method Get -Headers $m3Headers
     Assert-Equal ($m3Notifications.Count -ge 1) $true "Member 3 received notifications"
-    $acceptedNotif = $m3Notifications | Where-Object { $_.type -eq "JoinRequestAccepted" }
-    Assert-Equal ($acceptedNotif -ne $null) $true "Notification of type 'JoinRequestAccepted' received by user"
-    Assert-Equal $acceptedNotif.isRead $false "Notification is unread initially"
+    $acceptedNotifs = @($m3Notifications | Where-Object { $_.type -eq "JoinRequestAccepted" })
+    Assert-Equal ($acceptedNotifs.Count -ge 1) $true "Notification of type 'JoinRequestAccepted' received by user"
+    $acceptedNotif = $acceptedNotifs[0]
+    Assert-Equal ($acceptedNotif.isRead -eq $false) $true "Notification is unread initially"
 
     # Mark notification as read
     $markReadRes = Invoke-RestMethod -Uri "$BaseUrl/api/notifications/$($acceptedNotif.id)/read" -Method Put -Headers $m3Headers
