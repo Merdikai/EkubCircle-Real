@@ -39,23 +39,35 @@
         <div class="dropdown-menu notifications-menu">
           <div class="menu-header">
             <h4>Notifications</h4>
-            <span class="badge badge-active">1 New</span>
+            @if (unreadCount() > 0) {
+              <span class="badge badge-active">{{ unreadCount() }} New</span>
+            }
           </div>
-          <div class="notification-item unread">
-            <div class="notif-dot"></div>
-            <div class="notif-content">
-              <p class="notif-title">Contribution Received</p>
-              <p class="notif-desc">Amanuel Tesfaye contributed ETB 1,000 for Round 2.</p>
-              <span class="notif-time">10 mins ago</span>
+          @if (notificationService.notifications().length === 0) {
+            <div class="notif-empty-row">
+              <p>No notifications yet</p>
             </div>
-          </div>
-          <div class="notification-item">
-            <div class="notif-content">
-              <p class="notif-title">Round 1 Payout Complete</p>
-              <p class="notif-desc">ETB 12,000 disbursed to Amanuel Tesfaye.</p>
-              <span class="notif-time">Feb 15, 2025</span>
+          } @else {
+            <div class="notif-scroll-wrap">
+              @for (n of notificationService.notifications().slice(0, 5); track n.id) {
+                <div class="notification-item" [class.unread]="!n.isRead" (click)="markAsRead(n)">
+                  @if (!n.isRead) {
+                    <div class="notif-dot"></div>
+                  }
+                  <div class="notif-content">
+                    <p class="notif-title">{{ n.title }}</p>
+                    <p class="notif-desc">{{ n.message }}</p>
+                    <span class="notif-time">{{ n.createdAt | date:'mediumDate' }}</span>
+                  </div>
+                </div>
+              }
             </div>
-          </div>
+            <div class="menu-footer">
+              <a routerLink="/notifications" (click)="showNotifications.set(false)" class="view-all-link">
+                View All Notifications &rarr;
+              </a>
+            </div>
+          }
         </div>
       }
     </div>

@@ -105,6 +105,35 @@ public class ExecutePayoutCommandHandler : IRequestHandler<ExecutePayoutCommand,
             circle.CompletedAt = DateTime.UtcNow;
         }
 
+        var receiverDisplayName = !string.IsNullOrWhiteSpace(receiver.User?.FullName)
+            ? receiver.User.FullName
+            : $"Member #{receiver.MemberOrder}";
+
+        // Notify recipient
+        _context.Notifications.Add(new Notification
+        {
+            UserId = receiver.UserId,
+            Type = "PayoutCompleted",
+            Title = "Pot Disbursed To You!",
+            Message = $"Congratulations! The pot of {totalPot:N2} ETB for Round #{round.RoundNumber} of '{circle.Name}' has been disbursed to you.",
+            RelatedEntityId = circle.Id,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        // Notify other circle members
+        foreach (var m in circle.Members.Where(m => m.UserId != receiver.UserId))
+        {
+            _context.Notifications.Add(new Notification
+            {
+                UserId = m.UserId,
+                Type = "PayoutCompleted",
+                Title = "Round Completed",
+                Message = $"Round #{round.RoundNumber} pot of {totalPot:N2} ETB in '{circle.Name}' was successfully disbursed to {receiverDisplayName}.",
+                RelatedEntityId = circle.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return new PayoutResultDto

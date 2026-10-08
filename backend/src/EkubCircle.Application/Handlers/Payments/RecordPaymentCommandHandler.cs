@@ -80,6 +80,17 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
         };
 
         _context.Payments.Add(payment);
+
+        _context.Notifications.Add(new Notification
+        {
+            UserId = member.UserId,
+            Type = "PaymentReceived",
+            Title = "Contribution Confirmed",
+            Message = $"Your contribution of {payment.Amount:N2} ETB for Round #{round.RoundNumber} of '{circle.Name}' has been successfully recorded.",
+            RelatedEntityId = circle.Id,
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var memberUser = await _context.Users.FindAsync(new object[] { member.UserId }, cancellationToken);

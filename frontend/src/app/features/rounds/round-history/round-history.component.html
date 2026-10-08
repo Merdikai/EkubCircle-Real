@@ -97,7 +97,11 @@
             <div class="recipient-col">
               <span class="rec-label">Payout Recipient:</span>
               <div class="rec-pill">
-                <img [src]="r.receiverAvatar" [alt]="r.receiverName" class="rec-avatar" />
+                <img
+                  [src]="r.receiverAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'"
+                  [alt]="r.receiverName"
+                  class="rec-avatar"
+                />
                 <span class="rec-name">{{ r.receiverName }}</span>
               </div>
             </div>

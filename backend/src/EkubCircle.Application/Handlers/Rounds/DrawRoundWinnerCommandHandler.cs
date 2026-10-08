@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using EkubCircle.Application.Commands.Rounds;
 using EkubCircle.Application.Common.Interfaces;
 using EkubCircle.Application.DTOs.Rounds;
+using EkubCircle.Domain.Entities;
 using EkubCircle.Domain.Enums;
 
 namespace EkubCircle.Application.Handlers.Rounds;
@@ -68,6 +69,17 @@ public class DrawRoundWinnerCommandHandler : IRequestHandler<DrawRoundWinnerComm
 
         round.WinnerMemberId = winner.Id;
         round.DrawnAt = DateTime.UtcNow;
+
+        _context.Notifications.Add(new Notification
+        {
+            UserId = winner.UserId,
+            Type = "FairDrawWon",
+            Title = "Fair Draw Winner!",
+            Message = $"Congratulations! You have been selected as the fair draw winner for Round #{round.RoundNumber} of '{circle.Name}'!",
+            RelatedEntityId = circle.Id,
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return new DrawWinnerDto

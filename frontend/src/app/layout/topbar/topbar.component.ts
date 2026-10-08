@@ -1,8 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService, DEMO_USERS, NotificationService } from '../../core/services';
-import { User } from '../../core/models';
+import { User, EkubNotification } from '../../core/models';
 import { MobilePreviewModalComponent } from '../../shared/components';
 
 @Component({
@@ -12,7 +12,7 @@ import { MobilePreviewModalComponent } from '../../shared/components';
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.css']
 })
-export class TopbarComponent {
+export class TopbarComponent implements OnInit {
   authService = inject(AuthService);
   notificationService = inject(NotificationService);
   router = inject(Router);
@@ -22,7 +22,13 @@ export class TopbarComponent {
   showMobilePreview = signal(false);
   demoUsers = DEMO_USERS;
 
-  unreadCount = signal(1);
+  unreadCount = this.notificationService.unreadCount;
+
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.notificationService.getNotifications().subscribe();
+    }
+  }
 
   toggleUserMenu(): void {
     this.showUserMenu.update(v => !v);
@@ -32,6 +38,14 @@ export class TopbarComponent {
   toggleNotifications(): void {
     this.showNotifications.update(v => !v);
     this.showUserMenu.set(false);
+    if (this.showNotifications()) {
+      this.notificationService.getNotifications().subscribe();
+    }
+  }
+
+  markAsRead(item: EkubNotification): void {
+    if (item.isRead) return;
+    this.notificationService.markAsRead(item.id).subscribe();
   }
 
   switchUser(user: User): void {

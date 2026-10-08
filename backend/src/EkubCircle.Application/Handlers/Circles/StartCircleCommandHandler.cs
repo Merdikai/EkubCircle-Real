@@ -70,6 +70,19 @@ public class StartCircleCommandHandler : IRequestHandler<StartCircleCommand, Cir
             _context.Rounds.Add(round);
         }
 
+        foreach (var m in orderedMembers)
+        {
+            _context.Notifications.Add(new Notification
+            {
+                UserId = m.UserId,
+                Type = "CircleStarted",
+                Title = "Ekub Circle Started",
+                Message = $"'{circle.Name}' has officially started! Your assigned payout turn is #{m.MemberOrder}.",
+                RelatedEntityId = circle.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return new CircleDetailDto

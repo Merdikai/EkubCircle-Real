@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { EkubNotification } from '../models';
@@ -11,6 +11,9 @@ export class NotificationService {
   private notificationsSignal = signal<EkubNotification[]>([]);
 
   readonly notifications = this.notificationsSignal.asReadonly();
+  readonly unreadCount = computed(() =>
+    this.notificationsSignal().filter(n => !n.isRead).length
+  );
 
   getNotifications(unreadOnly?: boolean): Observable<EkubNotification[]> {
     const url = unreadOnly ? '/api/notifications?unreadOnly=true' : '/api/notifications';

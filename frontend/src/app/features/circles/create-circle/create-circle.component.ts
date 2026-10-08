@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { CircleService } from '../../../core/services';
+import { CircleService, MemberService, AuthService } from '../../../core/services';
 import { ToastService } from '../../../shared';
 
 @Component({
@@ -15,6 +15,8 @@ import { ToastService } from '../../../shared';
 export class CreateCircleComponent {
   private fb = inject(FormBuilder);
   private circleService = inject(CircleService);
+  private memberService = inject(MemberService);
+  private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private router = inject(Router);
 
@@ -24,14 +26,18 @@ export class CreateCircleComponent {
   // Reactive form adhering to domain models
   circleForm: FormGroup;
 
-  invitedMembers = signal<string[]>([
-    'amanuel@ekub.et (Organizer)',
-    'liya@ekub.et',
-    'mekonnen@ekub.et'
-  ]);
+  invitedMembers = signal<string[]>([]);
   newMemberInput = signal<string>('');
 
   constructor() {
+    const user = this.authService.currentUser();
+    const orgEmail = user?.email || 'organizer@ekub.local';
+    this.invitedMembers.set([
+      `${orgEmail} (Organizer)`,
+      'member1@ekub.local',
+      'member2@ekub.local'
+    ]);
+
     this.circleForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       contributionAmount: [1000, [Validators.required, Validators.min(100)]],
@@ -86,6 +92,20 @@ export class CreateCircleComponent {
       targetAmount: Number(formVal.targetAmount)
     }).subscribe({
       next: (created) => {
+        // Invite members added in step 2 (skipping organizer at index 0)
+        const emailsToInvite = this.invitedMembers()
+          .slice(1)
+          .map(e => e.replace(/\s*\(.*?\)/, '').trim())
+          .filter(e => e.length > 0);
+
+        if (emailsToInvite.length > 0) {
+          emailsToInvite.forEach(email => {
+            this.memberService.addMember(created.id, { email }).subscribe({
+              error: () => {}
+            });
+          });
+        }
+
         this.isLoading.set(false);
         this.toastService.success('Circle Created', `"${created.name}" is now Forming! Invite members to start.`);
         this.router.navigate(['/circles', created.id]);
