@@ -94,6 +94,17 @@ export class AuthService {
     return role === 'member';
   });
 
+  isOrganizerOf(circle?: { createdByUserId?: number } | null): boolean {
+    if (!circle) return false;
+    const user = this.currentUser();
+    if (!user) return false;
+    if (user.role?.toLowerCase() === 'admin') return true;
+    if (circle.createdByUserId) {
+      return circle.createdByUserId === user.id;
+    }
+    return this.isOrganizer();
+  }
+
   normalizeRole(role?: string): UserRole {
     if (!role) return 'Member';
     const r = role.trim().toLowerCase();

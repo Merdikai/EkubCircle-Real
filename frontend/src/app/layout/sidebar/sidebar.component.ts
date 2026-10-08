@@ -27,4 +27,13 @@ export class SidebarComponent {
     { label: 'Join Requests', route: '/join-requests', icon: 'receipt_long' },
     { label: 'Notifications', route: '/notifications', icon: 'redeem' }
   ];
+
+  get visibleNavItems(): NavItem[] {
+    return this.navItems.filter(item => {
+      if (item.route === '/circles/create') {
+        return this.authService.isOrganizer();
+      }
+      return true;
+    });
+  }
 }

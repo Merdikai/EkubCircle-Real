@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards';
+import { authGuard, organizerGuard } from './core/guards';
 import { AppShellComponent } from './layout';
 
 export const routes: Routes = [
@@ -27,6 +27,7 @@ export const routes: Routes = [
       },
       {
         path: 'circles/create',
+        canActivate: [organizerGuard],
         loadComponent: () => import('./features/circles/create-circle/create-circle.component').then(m => m.CreateCircleComponent)
       },
       {

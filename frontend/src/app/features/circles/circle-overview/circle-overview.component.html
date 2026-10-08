@@ -43,7 +43,7 @@
             </div>
 
             <!-- Start Circle Action for Organizer (if Forming) -->
-            @if (circle()!.status === 'Forming' && authService.isOrganizer()) {
+            @if (circle()!.status === 'Forming' && (authService.isOrganizerOf(circle()) || authService.isAdmin())) {
               <button class="btn btn-primary btn-sm start-btn" (click)="openStartCircleModal()">
                 Start Circle
               </button>

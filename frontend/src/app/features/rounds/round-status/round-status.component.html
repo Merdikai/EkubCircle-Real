@@ -84,7 +84,7 @@
         </button>
 
         <!-- Payout Button: Disabled unless all members paid (Rule: Non-negotiable) -->
-        @if (authService.isOrganizer()) {
+        @if (authService.isOrganizerOf(circle()) || authService.isAdmin()) {
           <button
             class="btn btn-primary"
             [disabled]="!currentRound()!.isEligibleForPayout || currentRound()!.status === 'Paid Out'"

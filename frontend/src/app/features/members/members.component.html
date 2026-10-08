@@ -51,7 +51,7 @@
     }
 
     <!-- Add Member Card (Only visible when Forming) -->
-    @if (circle()!.status === 'Forming' && authService.isOrganizer()) {
+    @if (circle()!.status === 'Forming' && (authService.isOrganizerOf(circle()) || authService.isAdmin())) {
       <div class="add-member-card">
         <h4 class="card-title">Add Member to Ekub</h4>
         <div class="add-member-form">
@@ -94,6 +94,9 @@
               <th>Role</th>
               <th>Payout Status</th>
               <th>Joined Date</th>
+              @if (circle()!.status === 'Forming' && (authService.isOrganizerOf(circle()) || authService.isAdmin())) {
+                <th>Actions</th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -135,6 +138,17 @@
                   }
                 </td>
                 <td class="date-cell">{{ m.joinedAt | date:'mediumDate' }}</td>
+                @if (circle()!.status === 'Forming' && (authService.isOrganizerOf(circle()) || authService.isAdmin())) {
+                  <td>
+                    @if (m.roleInCircle !== 'Organizer') {
+                      <button class="btn btn-sm btn-outline remove-member-btn" (click)="removeMember(m.id)" title="Remove member before circle starts">
+                        Remove
+                      </button>
+                    } @else {
+                      <span class="organizer-badge-tag">Creator</span>
+                    }
+                  </td>
+                }
               </tr>
             }
           </tbody>
@@ -157,7 +171,7 @@
                 </div>
               </div>
 
-              @if (circle()!.status === 'Forming' && authService.isOrganizer()) {
+              @if (circle()!.status === 'Forming' && (authService.isOrganizerOf(circle()) || authService.isAdmin())) {
                 <div class="request-actions">
                   <button class="btn btn-sm btn-primary" (click)="acceptJoinRequest(req)">Accept</button>
                   <button class="btn btn-sm btn-outline" (click)="rejectJoinRequest(req)">Decline</button>
