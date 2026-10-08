@@ -238,7 +238,19 @@ npm start
 | **Completed Circle Summary** | `/circles/:id/summary` | Completed circle audit report displaying total pot disbursed, rotation history, and member audit metrics. | Screen 13 |
 
 
-### 2. Run the 12-Suite Automated Verification Test
+### 3. Run the Automated Backend Tests (80 Tests, 100% Green)
+Adhering to enterprise .NET 10 testing pyramid architecture (unit tests, boundary theories, NSubstitute mocks, and `WebApplicationFactory` API integration tests):
+
+```powershell
+dotnet test backend/tests/EkubCircle.Tests/EkubCircle.Tests.csproj --no-build
+```
+
+**Testing Pyramid Architecture:**
+- **Tier 1 (Pure Domain Logic)**: `EkubCalculationServiceTests` with `[Fact]` and parameterized `[Theory]` boundary tests (testing zero, negative, deadline edges, grace period cutoffs, and draw ticket calculations).
+- **Tier 2 (Boundary Mocking)**: Command handler tests using `NSubstitute` asserting exact `Received(1)` and `DidNotReceive()` interactions across validation branches.
+- **Tier 3 (HTTP Pipeline Integration)**: `CustomWebApplicationFactory<Program>` in-memory test server running integration suites (`AuthApiIntegrationTests`, `CirclesApiIntegrationTests`, `RoundsApiIntegrationTests`) asserting HTTP status codes and contract shapes.
+
+### 4. Run the 12-Suite Automated Live API Verification Test
 We provide an automated PowerShell test suite verifying all 7 server-side rules, innovation features, join requests, and notifications end-to-end:
 
 ```powershell

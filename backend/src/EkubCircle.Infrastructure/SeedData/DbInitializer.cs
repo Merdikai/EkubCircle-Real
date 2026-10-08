@@ -9,7 +9,7 @@ public static class DbInitializer
 {
     public static async Task SeedAsync(EkubDbContext context)
     {
-        if (context.Database.IsNpgsql())
+        if (!context.Database.IsRelational() || context.Database.IsNpgsql())
         {
             await context.Database.EnsureCreatedAsync();
         }
