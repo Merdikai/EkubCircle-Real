@@ -12,14 +12,15 @@ export class NotificationService {
 
   readonly notifications = this.notificationsSignal.asReadonly();
 
-  getNotifications(): Observable<EkubNotification[]> {
-    return this.http.get<EkubNotification[]>('/api/notifications').pipe(
+  getNotifications(unreadOnly?: boolean): Observable<EkubNotification[]> {
+    const url = unreadOnly ? '/api/notifications?unreadOnly=true' : '/api/notifications';
+    return this.http.get<EkubNotification[]>(url).pipe(
       tap(items => this.notificationsSignal.set(items))
     );
   }
 
   markAsRead(id: number): Observable<void> {
-    return this.http.post<void>(`/api/notifications/${id}/read`, {}).pipe(
+    return this.http.put<void>(`/api/notifications/${id}/read`, {}).pipe(
       tap(() => {
         this.notificationsSignal.update(list =>
           list.map(n => n.id === id ? { ...n, isRead: true } : n)

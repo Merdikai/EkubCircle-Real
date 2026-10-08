@@ -37,9 +37,11 @@ export class RecordPaymentModalComponent {
 
     this.isSubmitting.set(true);
 
+    const effectiveRoundId = this.round().roundId || this.round().id || 0;
     this.paymentService.recordPayment({
       circleId: this.circle().id,
-      roundId: this.round().id,
+      roundId: effectiveRoundId,
+      memberId: memId,
       circleMemberId: memId,
       amount: this.circle().contributionAmount,
       paymentType: 'Normal'

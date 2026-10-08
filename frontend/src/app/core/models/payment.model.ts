@@ -1,33 +1,42 @@
-export type PaymentStatus = 'Completed' | 'Pending' | 'Failed';
-export type PaymentType = 'Normal' | 'Extra';
+export type PaymentStatus = 'Paid' | 'Completed' | 'Pending' | 'Failed';
+export type PaymentType = 'Normal' | 'Extra' | 'Contribution' | 'Payout';
 
 export interface Payment {
   id: number;
   roundId: number;
-  circleMemberId: number;
+  roundNumber?: number;
+  memberId?: number;
+  circleMemberId?: number;
+  memberName: string;
   amount: number;
-  paymentType: PaymentType;
-  status: PaymentStatus;
+  paymentType: PaymentType | string;
+  chanceCount?: number;
+  status: PaymentStatus | string;
+  paymentMethod?: string;
+  notes?: string | null;
+  isLate?: boolean;
   paidAt: string;
   
   // UI helpers
-  memberName?: string;
   memberAvatar?: string;
   circleName?: string;
-  roundNumber?: number;
 }
 
 export interface RecordPaymentRequest {
-  circleId: number;
+  circleId?: number;
   roundId: number;
-  circleMemberId: number;
-  amount?: number; // Defaults to circle's fixed contribution amount
-  paymentType?: PaymentType;
+  memberId?: number;
+  circleMemberId?: number;
+  amount: number;
+  paymentType?: PaymentType | string;
+  paymentMethod?: string;
+  notes?: string;
+  isLate?: boolean;
 }
 
 export interface PaymentHistoryFilter {
   circleId?: number;
   roundId?: number;
-  month?: string; // e.g., '2025-04' or 'April 2025'
+  month?: string;
   status?: PaymentStatus;
 }

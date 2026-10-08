@@ -183,12 +183,27 @@ The API acts as the single source of truth and strictly enforces all business ru
 
 ---
 
-## 🚀 Running the Backend
+## ⚙️ Configuration & Database Setup
+
+The backend automatically supports both **SQLite (zero-setup default)** and **PostgreSQL**:
+- By default, `appsettings.json` connects to local SQLite (`ekubcircle.db`), requiring zero external database configuration.
+- To use PostgreSQL, copy `backend/src/EkubCircle.API/appsettings.Development.example.json` to `appsettings.Development.json` (or use `.env.example` as a template) and configure your connection string:
+  ```json
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ekubcircle_db;Username=postgres;Password=your_password_here"
+  }
+  ```
+  *(Note: All credentials, passwords, and `.env` / `appsettings.*.json` files are protected and excluded by `.gitignore`)*.
+
+---
+
+## 🚀 Running the Project
 
 ### Prerequisites
 - [.NET 9 / .NET 10 SDK](https://dotnet.microsoft.com/)
+- [Node.js v20+ & npm](https://nodejs.org/)
 
-### 1. Build & Run the API Server
+### 1. Build & Run the Backend API
 ```powershell
 dotnet build backend/EkubCircle.sln
 dotnet run --project backend/src/EkubCircle.API/EkubCircle.API.csproj --urls "http://localhost:5000"
@@ -196,6 +211,15 @@ dotnet run --project backend/src/EkubCircle.API/EkubCircle.API.csproj --urls "ht
 
 - **Swagger UI**: Accessible at `http://localhost:5000/` or `http://localhost:5000/swagger`
 - **CORS**: Configured with `AllowAll` for local frontend development servers.
+
+### 2. Run the Angular Frontend
+```powershell
+cd frontend
+npm install
+npm start
+```
+- **App URL**: `http://localhost:4200/` (proxied to API at `http://localhost:5000`)
+
 
 ### 2. Run the 12-Suite Automated Verification Test
 We provide an automated PowerShell test suite verifying all 7 server-side rules, innovation features, join requests, and notifications end-to-end:

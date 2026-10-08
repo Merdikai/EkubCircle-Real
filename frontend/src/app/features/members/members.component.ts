@@ -83,9 +83,7 @@ export class MembersComponent implements OnInit {
 
     this.isAdding.set(true);
     this.memberService.addMember(c.id, {
-      circleId: c.id,
-      emailOrPhone: email,
-      fullName: this.newMemberName().trim() || undefined
+      email: email
     }).subscribe({
       next: (newM) => {
         this.isAdding.set(false);
@@ -96,7 +94,27 @@ export class MembersComponent implements OnInit {
       },
       error: (err) => {
         this.isAdding.set(false);
-        this.toastService.error('Failed', err.error?.detail || 'Could not add member.');
+        this.toastService.error('Failed', err.error?.detail || err.error?.message || 'Could not add member.');
+      }
+    });
+  }
+
+  removeMember(memberId: number): void {
+    const c = this.circle();
+    if (!c) return;
+
+    if (c.status !== 'Forming') {
+      this.toastService.error('Action Blocked', 'Cannot remove members after circle has started.');
+      return;
+    }
+
+    this.memberService.removeMember(c.id, memberId).subscribe({
+      next: () => {
+        this.members.update(list => list.filter(m => m.id !== memberId));
+        this.toastService.success('Member Removed', 'Member was removed from the circle.');
+      },
+      error: (err) => {
+        this.toastService.error('Failed', err.error?.detail || err.error?.message || 'Could not remove member.');
       }
     });
   }

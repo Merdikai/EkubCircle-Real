@@ -62,7 +62,11 @@ pnpm-debug.log*
 .env.*
 !.env.example
 appsettings.Production.json
+appsettings.Development.json
 appsettings.Local.json
+*.local.json
+!appsettings.Development.example.json
+!appsettings.example.json
 
 # ------------------------------------------------------------------------------
 # OS and Temporary Artifacts

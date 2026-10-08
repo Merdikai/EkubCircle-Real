@@ -91,7 +91,7 @@ export class CircleOverviewComponent implements OnInit {
       next: (res) => {
         this.isStarting.set(false);
         this.isStartModalOpen.set(false);
-        this.toastService.success('Circle Started!', res.message);
+        this.toastService.success('Circle Started!', res.message || 'Circle started successfully');
         this.loadCircleData();
       },
       error: (err) => {

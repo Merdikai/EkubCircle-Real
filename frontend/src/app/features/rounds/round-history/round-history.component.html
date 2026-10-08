@@ -64,9 +64,9 @@
             <div class="tx-info-col">
               <div class="tx-title-row">
                 <h4 class="tx-name">{{ payment.memberName }}</h4>
-                @if (payment.memberName === 'Amanuel Tesfaye') {
-                  <span class="winner-ongoing-badge" title="Received pot in Round 1 and continues paying">
-                    ★ Round 1 Winner (Ongoing Contributor)
+                @if (payment.isLate) {
+                  <span class="badge badge-warning" title="Late contribution flag">
+                    Late Payment
                   </span>
                 }
               </div>
@@ -74,7 +74,7 @@
               <span class="tx-date">{{ payment.paidAt | date:'mediumDate' }} • {{ payment.paidAt | date:'shortTime' }}</span>
             </div>
             <div class="tx-status-col">
-              <span class="badge badge-completed">Completed</span>
+              <span class="badge badge-completed">{{ payment.status || 'Paid' }}</span>
             </div>
           </div>
         }
@@ -84,8 +84,8 @@
     <!-- TAB 2: Payout Rounds History -->
     @if (selectedTab() === 'payouts') {
       <div class="rounds-history-list">
-        @for (r of rounds(); track r.id) {
-          <div class="round-history-item" [class.is-paid-out]="r.status === 'Paid Out'">
+        @for (r of rounds(); track (r.roundId || r.id)) {
+          <div class="round-history-item" [class.is-paid-out]="r.status === 'Paid Out' || r.status === 'PaidOut'">
             <div class="round-left-meta">
               <span class="round-badge">Round #{{ r.roundNumber }}</span>
               <div class="round-pot-info">

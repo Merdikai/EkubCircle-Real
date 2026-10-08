@@ -35,9 +35,17 @@ export class TopbarComponent {
   }
 
   switchUser(user: User): void {
-    this.authService.loginWithDemoUser(user);
-    this.showUserMenu.set(false);
-    this.router.navigate(['/dashboard']);
+    this.authService.loginWithDemoUser(user).subscribe({
+      next: () => {
+        this.showUserMenu.set(false);
+        this.router.navigate(['/dashboard']).then(() => {
+          window.location.reload();
+        });
+      },
+      error: () => {
+        this.showUserMenu.set(false);
+      }
+    });
   }
 
   logout(): void {

@@ -1,21 +1,50 @@
-export type RoundStatus = 'Open' | 'Paid Out';
+export type RoundStatus = 'Pending' | 'Open' | 'Drawn' | 'Closed' | 'PaidOut' | 'Paid Out';
+
+export interface CurrentRoundMember {
+  memberId: number;
+  userId: number;
+  fullName: string;
+  email: string;
+  memberOrder: number;
+  hasReceived: boolean;
+  hasPaidThisRound: boolean;
+  amountPaid?: number | null;
+  paidAt?: string | null;
+  paymentMethod?: string | null;
+  notes?: string | null;
+  isLate: boolean;
+}
 
 export interface Round {
-  id: number;
-  circleId: number;
+  id?: number;
+  roundId?: number;
+  circleId?: number;
+  circleName?: string;
   roundNumber: number;
-  receiverMemberId: number; // Server-defined fixed receiver
-  status: RoundStatus;
-  potAmount: number; // In ETB
-  paidOutAt?: string | null;
-  
-  // UI helper fields
+  totalRounds?: number;
+  status: string;
+  receiverMemberId: number;
   receiverName?: string;
+  receiverFullName?: string;
+  receiverEmail?: string;
+  receiverMemberOrder?: number;
   receiverAvatar?: string;
-  paidMembersCount?: number;
+  contributionAmount?: number;
+  targetPotAmount?: number;
+  currentPotAmount?: number;
+  potAmount?: number;
+  totalMembers?: number;
   totalMembersCount?: number;
+  paidCount?: number;
+  paidMembersCount?: number;
+  isReadyForPayout?: boolean;
   isEligibleForPayout?: boolean;
+  paidOutAt?: string | null;
+  members?: CurrentRoundMember[];
 }
+
+export type CurrentRound = Round;
+export type RoundSummary = Round;
 
 export interface PayoutRoundRequest {
   roundId: number;
@@ -24,14 +53,24 @@ export interface PayoutRoundRequest {
 
 export interface PayoutRoundResponse {
   roundId: number;
-  circleId: number;
   roundNumber: number;
+  potAmount: number;
   receiverMemberId: number;
   receiverName: string;
-  potAmount: number;
-  status: RoundStatus;
   paidOutAt: string;
-  nextRound?: Round | null;
-  isCircleCompleted: boolean;
+  roundStatus: string;
+  circleStatus: string;
+  nextRoundNumber?: number | null;
+  message: string;
+}
+
+export interface DrawWinnerResponse {
+  roundId: number;
+  roundNumber: number;
+  winnerMemberId: number;
+  winnerName: string;
+  winnerEmail: string;
+  eligibleCandidatesCount: number;
+  drawnAt: string;
   message: string;
 }

@@ -101,6 +101,22 @@
               Payout Locked (Pending All Contributions)
             }
           </button>
+
+          <!-- Server-Side Fair Draw Simulator (Innovation) -->
+          @if (currentRound()!.status === 'Open') {
+            <button
+              class="btn btn-secondary draw-btn"
+              [disabled]="isDrawingWinner()"
+              (click)="conductFairDraw()"
+              title="Conduct cryptographically fair lottery draw among paid, eligible members"
+            >
+              @if (isDrawingWinner()) {
+                Drawing Winner...
+              } @else {
+                🎲 Fair Draw Simulator
+              }
+            </button>
+          }
         }
       </div>
     </div>

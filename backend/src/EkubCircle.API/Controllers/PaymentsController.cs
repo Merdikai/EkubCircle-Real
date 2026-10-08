@@ -88,7 +88,7 @@ public class PaymentsController : ControllerBase
     [HttpGet("/api/circles/{circleId:int}/history")]
     [HttpGet("/api/history")]
     [ProducesResponseType(typeof(List<PaymentDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetPayments([FromQuery] int? circleId, [FromQuery] int? roundId)
+    public async Task<IActionResult> GetPayments(int? circleId, [FromQuery] int? roundId)
     {
         var userId = GetCurrentUserId();
         var query = new GetPaymentsQuery(circleId, roundId, userId);

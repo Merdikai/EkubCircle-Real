@@ -15,12 +15,21 @@ export interface CircleMember {
   user?: User;
   fullName?: string;
   email?: string;
+  phoneNumber?: string;
   avatarUrl?: string;
   paidThisRound?: boolean;
 }
 
 export interface AddMemberRequest {
-  circleId: number;
-  emailOrPhone: string;
+  email: string;
+  circleId?: number;
+  emailOrPhone?: string;
   fullName?: string;
+}
+
+export interface CreateJoinRequestPayload {
+  circleId: number;
+  email?: string;
+  requestedUserId?: number;
+  message?: string;
 }

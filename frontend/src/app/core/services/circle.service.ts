@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Circle, CreateCircleRequest, StartCircleResponse, Payment } from '../models';
+import { Circle, CreateCircleRequest, StartCircleResponse, Payment, CircleSummary } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -28,5 +28,9 @@ export class CircleService {
 
   getCircleHistory(id: number): Observable<Payment[]> {
     return this.http.get<Payment[]>(`${this.baseUrl}/${id}/history`);
+  }
+
+  getCircleSummary(id: number): Observable<CircleSummary> {
+    return this.http.get<CircleSummary>(`${this.baseUrl}/${id}/summary`);
   }
 }

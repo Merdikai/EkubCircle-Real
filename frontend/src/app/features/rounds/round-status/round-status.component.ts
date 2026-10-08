@@ -80,6 +80,30 @@ export class RoundStatusComponent implements OnInit {
     this.isPaymentModalOpen.set(false);
   }
 
+  // Fair Draw Simulator (Innovation feature)
+  isDrawingWinner = signal<boolean>(false);
+
+  conductFairDraw(): void {
+    const r = this.currentRound();
+    if (!r) return;
+
+    const roundId = r.roundId || r.id;
+    if (!roundId) return;
+
+    this.isDrawingWinner.set(true);
+    this.roundService.drawWinner(roundId).subscribe({
+      next: (res) => {
+        this.isDrawingWinner.set(false);
+        this.toastService.success('Fair Draw Completed!', res.message);
+        this.loadRoundData();
+      },
+      error: (err) => {
+        this.isDrawingWinner.set(false);
+        this.toastService.error('Draw Blocked', err.error?.detail || err.error?.message || 'Could not conduct draw.');
+      }
+    });
+  }
+
   // Record Normal Contribution
   submitPayment(): void {
     const r = this.currentRound();
@@ -87,11 +111,15 @@ export class RoundStatusComponent implements OnInit {
     const memId = this.selectedMemberId();
     if (!r || !c || !memId) return;
 
+    const roundId = r.roundId || r.id;
+    if (!roundId) return;
+
     this.isSubmittingPayment.set(true);
 
     this.paymentService.recordPayment({
       circleId: c.id,
-      roundId: r.id,
+      roundId: roundId,
+      memberId: memId,
       circleMemberId: memId,
       amount: c.contributionAmount,
       paymentType: 'Normal'
@@ -100,18 +128,11 @@ export class RoundStatusComponent implements OnInit {
         this.isSubmittingPayment.set(false);
         this.isPaymentModalOpen.set(false);
         this.toastService.success('Payment Recorded', `Contribution of ETB ${payment.amount} recorded successfully.`);
-        
-        // If current logged-in user contributed, deduct from wallet
-        if (memId === 101 && this.authService.currentUser()?.id === 1) {
-          this.authService.updateWalletBalance(-payment.amount);
-        }
-
         this.loadRoundData();
       },
       error: (err) => {
         this.isSubmittingPayment.set(false);
-        // NON-NEGOTIABLE RULE: A duplicate normal payment must be rejected by API and surfaced clearly in UI
-        const errorDetail = err.error?.detail || 'Payment failed or was duplicate.';
+        const errorDetail = err.error?.detail || err.error?.message || 'Payment failed or was duplicate.';
         this.toastService.error('Payment Error', errorDetail);
       }
     });
@@ -126,14 +147,17 @@ export class RoundStatusComponent implements OnInit {
     this.isPayoutModalOpen.set(false);
   }
 
-  // Execute Payout (Phase 17)
+  // Execute Payout
   confirmPayout(): void {
     const r = this.currentRound();
     if (!r) return;
 
+    const roundId = r.roundId || r.id;
+    if (!roundId) return;
+
     this.isSubmittingPayout.set(true);
 
-    this.roundService.payoutRound(r.id).subscribe({
+    this.roundService.payoutRound(roundId).subscribe({
       next: (res) => {
         this.isSubmittingPayout.set(false);
         this.isPayoutModalOpen.set(false);
@@ -142,7 +166,7 @@ export class RoundStatusComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmittingPayout.set(false);
-        this.toastService.error('Payout Blocked', err.error?.detail || 'Cannot disburse pot until all members contribute.');
+        this.toastService.error('Payout Blocked', err.error?.detail || err.error?.message || 'Cannot disburse pot until all members contribute.');
       }
     });
   }
