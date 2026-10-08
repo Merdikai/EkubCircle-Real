@@ -220,6 +220,23 @@ npm start
 ```
 - **App URL**: `http://localhost:4200/` (proxied to API at `http://localhost:5000`)
 
+---
+
+## 📱 Frontend Screens & Wireframe Coverage (100% Wireframe Alignment)
+
+| Screen | Route | Role / Purpose | Wireframe Mapping |
+|---|---|---|---|
+| **Login & Register** | `/login` | Authentication with 6 pre-seeded judging accounts (Admin, Organizer, Members 1–4). | Screen 1 |
+| **Member Home Ledger** | `/dashboard` | Primary member dashboard showing active round, current receiver, pot so far, **PAID/UNPAID** badge with 1-click contribution, and **YES/NO** pot receipt flag. | Screen 6 |
+| **Create Circle** | `/circles/create` | Organizer sets circle name, contribution in Birr, and meeting frequency label. | Screen 2 |
+| **Forming Circle & Members** | `/circles/:id/members` | Add members by email, review join requests, remove members during forming stage. | Screen 3 |
+| **Start Circle Modal** | `/circles/:id` | Irreversible start confirmation: locks member list, fixes deterministic payout order, generates rounds. | Screen 4 |
+| **Join Requests & Invites** | `/join-requests` | Organizers invite users by email; members review and accept/decline incoming invitations. | Screen 5 |
+| **Current Round (Member & Organizer)** | `/circles/:id/round` | Live pot collection progress, member payment checklist, **Fair Draw Simulator**, and 100% contribution payout disbursement. | Screens 7, 8, 9, 10 |
+| **Round & Winner History** | `/circles/:id/history` | Historical audit of member contributions, late payment indicators, and completed payout rounds. | Screen 11 |
+| **Audit Notifications** | `/notifications` | Live event audit trail of invitations, contributions, round starts, and pot disbursements. | Screen 12 |
+| **Completed Circle Summary** | `/circles/:id/summary` | Completed circle audit report displaying total pot disbursed, rotation history, and member audit metrics. | Screen 13 |
+
 
 ### 2. Run the 12-Suite Automated Verification Test
 We provide an automated PowerShell test suite verifying all 7 server-side rules, innovation features, join requests, and notifications end-to-end:

@@ -46,8 +46,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/rounds/round-history/round-history.component').then(m => m.RoundHistoryComponent)
       },
       {
-        path: 'wallet',
-        loadComponent: () => import('./features/payments/wallet-transactions/wallet-transactions.component').then(m => m.WalletTransactionsComponent)
+        path: 'circles/:circleId/summary',
+        loadComponent: () => import('./features/circles/circle-summary/circle-summary.component').then(m => m.CircleSummaryComponent)
+      },
+      {
+        path: 'join-requests',
+        loadComponent: () => import('./features/join-requests/join-requests.component').then(m => m.JoinRequestsComponent)
+      },
+      {
+        path: 'circles/:circleId/join-requests',
+        loadComponent: () => import('./features/join-requests/join-requests.component').then(m => m.JoinRequestsComponent)
       },
       {
         path: 'notifications',

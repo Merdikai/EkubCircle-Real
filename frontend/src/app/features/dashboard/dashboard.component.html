@@ -1,176 +1,242 @@
 <div class="dashboard-page">
-  <!-- Hero Banner with Banknote Engraving Motif -->
-  <section class="hero-banner">
-    <div class="hero-content">
-      <h2 class="hero-title">
-        {{ getGreeting() }}, {{ authService.currentUser()?.fullName?.split(' ')?.at(0) || 'Amanuel' }}
+  <!-- Top Greeting Header -->
+  <section class="dashboard-welcome-header">
+    <div class="welcome-text-col">
+      <h2 class="welcome-title">
+        {{ getGreeting() }}, {{ authService.currentUser()?.fullName?.split(' ')?.at(0) || 'Member' }}
       </h2>
-      <p class="hero-subtitle">Together we save, together we grow.</p>
+      <p class="welcome-subtitle">
+        Your Ethiopian Rotating Savings & Credit Ledger (ዕቁብ)
+      </p>
     </div>
-
-    <!-- Etched Banknote & Lion Background Art -->
-    <div class="hero-artwork">
-      <img src="assets/images/banknote-guilloche.svg" alt="Guilloche waves" class="guilloche-bg" />
-      <img src="assets/images/addis-landmark.svg" alt="Addis Ababa landmarks" class="landmarks-art" />
-      <img src="assets/images/ethiopian-lion.svg" alt="Crowned Lion of Judah" class="lion-art" />
+    <div class="role-badge-pill" [class.organizer-pill]="authService.isOrganizer()">
+      <span class="role-dot"></span>
+      <span>Role: <strong>{{ authService.currentUser()?.role || 'Member' }}</strong></span>
     </div>
   </section>
 
-  <!-- Financial Summary Metrics (4 Cards from mockup) -->
-  <section class="metrics-grid">
-    <app-stat-card
-      [label]="'Total Saved'"
-      [value]="totalSaved() | etbCurrency"
-      [subtext]="'Across ' + activeGroupsCount() + ' groups'"
-      [theme]="'burgundy'"
-    >
-      <div icon class="isometric-icon">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-      </div>
-    </app-stat-card>
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your active Ekub ledger...</p>
+    </div>
+  } @else {
+    <!-- ========================================================================= -->
+    <!-- PRIMARY HERO CARD: Wireframe Screen 6 (Member Home)                       -->
+    <!-- ========================================================================= -->
+    @if (selectedCircle() && selectedCircle()!.status === 'Active' && currentRound()) {
+      <section class="member-home-hero-card">
+        <div class="card-top-bar">
+          <div class="circle-name-block">
+            <span class="meta-sub">Active Ekub Circle</span>
+            <h3 class="circle-main-title">{{ selectedCircle()!.name }}</h3>
+          </div>
+          <div class="round-status-pill-group">
+            <span class="round-counter-pill">
+              Round #{{ currentRound()!.roundNumber }} of {{ currentRound()!.totalRounds }}
+            </span>
+            <app-status-badge [status]="currentRound()!.status"></app-status-badge>
+          </div>
+        </div>
 
-    <app-stat-card
-      [label]="'Available Balance'"
-      [value]="availableBalance() | etbCurrency"
-      [subtext]="'In your wallet'"
-      [theme]="'blue'"
-    >
-      <div icon class="isometric-icon">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="4" width="20" height="16" rx="2"/>
-          <path d="M16 12h.01"/>
-          <path d="M2 10h20"/>
-        </svg>
-      </div>
-    </app-stat-card>
-
-    <app-stat-card
-      [label]="'Total Contributions'"
-      [value]="monthlyContributions() | etbCurrency"
-      [subtext]="'This month'"
-      [theme]="'white'"
-    >
-      <div icon class="isometric-icon">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-          <polyline points="17 6 23 6 23 12"/>
-        </svg>
-      </div>
-    </app-stat-card>
-
-    <app-stat-card
-      [label]="'Active Groups'"
-      [value]="activeGroupsCount().toString()"
-      [subtext]="'Out of ' + totalGroupsCount()"
-      [theme]="'white'"
-    >
-      <div icon class="isometric-icon">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-    </app-stat-card>
-  </section>
-
-  <!-- Middle Section: "Your Groups" & Inspirational Proverb Card -->
-  <section class="groups-section">
-    <div class="groups-main-col">
-      <div class="section-header">
-        <h3 class="section-title">Your Groups</h3>
-        <a routerLink="/circles" class="view-all-link">
-          View all
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </a>
-      </div>
-
-      <!-- Groups Cards Grid -->
-      <div class="groups-cards-grid">
-        @for (circle of activeCircles().slice(0, 3); track circle.id) {
-          <div class="group-card">
-            <!-- Landmark Cover Header -->
-            <div class="card-cover-art" [ngClass]="'accent-' + circle.accentColor">
-              <img src="assets/images/addis-landmark.svg" alt="Addis landmark" class="cover-landmark-img" />
+        <!-- 4-Grid Core Ledger Status Metrics (Exact Wireframe Screen 6) -->
+        <div class="ledger-metrics-grid">
+          <!-- 1. Current Receiver -->
+          <div class="metric-card receiver-highlight-card">
+            <span class="metric-label">Current Receiver</span>
+            <div class="receiver-row">
+              <div class="receiver-avatar-circle">
+                <span>{{ currentRound()!.receiverFullName?.charAt(0) || 'R' }}</span>
+              </div>
+              <div class="receiver-text">
+                <h4 class="receiver-name">{{ currentRound()!.receiverFullName }}</h4>
+                <span class="receiver-hint">Turn Order #{{ currentRound()!.receiverMemberOrder }}</span>
+              </div>
             </div>
+            <span class="metric-subtext">Fixed server-determined recipient</span>
+          </div>
 
-            <!-- Card Content -->
-            <div class="card-body">
-              <div class="group-title-row">
-                <span class="group-icon-wrap" [ngClass]="'icon-' + circle.accentColor">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                  </svg>
-                </span>
-                <div class="group-name-col">
-                  <h4 class="group-name">{{ circle.name }}</h4>
-                  <span class="group-members-count">{{ circle.memberCount }} members</span>
-                </div>
+          <!-- 2. Pot Collected So Far -->
+          <div class="metric-card pot-highlight-card">
+            <span class="metric-label">Pot So Far</span>
+            <h3 class="metric-value pot-amount text-burgundy">
+              {{ (currentRound()!.currentPotAmount ?? currentRound()!.potAmount ?? 0) | etbCurrency }}
+            </h3>
+            <span class="metric-subtext">
+              Target: {{ currentRound()!.targetPotAmount | etbCurrency }} ({{ currentRound()!.paidCount }}/{{ currentRound()!.totalMembers }} Paid)
+            </span>
+          </div>
+
+          <!-- 3. My Payment Status (Wireframe Screen 6: "My payment: PAID / UNPAID") -->
+          <div class="metric-card payment-status-card" [class.is-paid]="hasCurrentUserPaid()" [class.is-unpaid]="!hasCurrentUserPaid()">
+            <span class="metric-label">My Payment (Round #{{ currentRound()!.roundNumber }})</span>
+            @if (hasCurrentUserPaid()) {
+              <div class="status-indicator-row paid-indicator">
+                <span class="check-icon">✓</span>
+                <span class="status-text">PAID</span>
               </div>
-
-              <!-- Savings Progress -->
-              <div class="progress-section">
-                <div class="progress-labels">
-                  <span class="current-saved">{{ circle.totalSaved | etbCurrency }}</span>
-                  <span class="target-amount">/ {{ circle.targetAmount | etbCurrency }}</span>
-                </div>
-                <div class="progress-track">
-                  <div
-                    class="progress-fill"
-                    [ngClass]="'fill-' + circle.accentColor"
-                    [style.width.%]="((circle.totalSaved ?? 0) / (circle.targetAmount || 1)) * 100"
-                  ></div>
-                </div>
+              <span class="metric-subtext">Contribution fulfilled for this round</span>
+            } @else {
+              <div class="status-indicator-row unpaid-indicator">
+                <span class="alert-icon">!</span>
+                <span class="status-text">UNPAID</span>
               </div>
-
-              <!-- Next Contribution Info -->
-              <div class="next-contrib-row">
-                <span class="contrib-label">Next contribution</span>
-                <span class="contrib-days">{{ circle.nextContributionDays }} days left</span>
-              </div>
-
-              <!-- Action Button -->
-              <a
-                [routerLink]="['/circles', circle.id]"
-                class="btn btn-block"
-                [ngClass]="circle.accentColor === 'blue' ? 'btn-secondary' : 'btn-primary'"
+              <button
+                class="btn btn-sm btn-primary quick-pay-btn"
+                [disabled]="isPaying()"
+                (click)="payMyContribution()"
               >
-                View Group
-              </a>
+                @if (isPaying()) {
+                  Processing...
+                } @else {
+                  Pay Contribution ({{ selectedCircle()!.contributionAmount | etbCurrency }})
+                }
+              </button>
+            }
+          </div>
+
+          <!-- 4. Have I Received? (Wireframe Screen 6: "Have I received?: NO / YES") -->
+          <div class="metric-card receipt-status-card" [class.has-won]="hasCurrentUserReceived()">
+            <span class="metric-label">Have I Received the Pot?</span>
+            @if (hasCurrentUserReceived()) {
+              <div class="status-indicator-row received-indicator">
+                <span class="star-icon">★</span>
+                <span class="status-text">YES</span>
+              </div>
+              <span class="metric-subtext">Pot collected in previous round</span>
+            } @else {
+              <div class="status-indicator-row not-received-indicator">
+                <span class="circle-icon">○</span>
+                <span class="status-text">NO</span>
+              </div>
+              <span class="metric-subtext">Eligible candidate for upcoming rounds</span>
+            }
+          </div>
+        </div>
+
+        <!-- Wireframe Screen 6 Action Footer -->
+        <div class="ledger-actions-footer">
+          <a [routerLink]="['/circles', selectedCircle()!.id, 'round']" class="btn btn-outline">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+            <span>Round Details & Roster</span>
+          </a>
+
+          <a [routerLink]="['/circles', selectedCircle()!.id, 'history']" class="btn btn-outline">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 12 20 22 4 22 4 12"/>
+              <rect x="2" y="7" width="20" height="5"/>
+            </svg>
+            <span>Winner & Round History</span>
+          </a>
+
+          @if (selectedCircle()!.status === 'Completed') {
+            <a [routerLink]="['/circles', selectedCircle()!.id, 'summary']" class="btn btn-primary">
+              <span>View Completed Audit Report</span>
+            </a>
+          }
+        </div>
+      </section>
+    } @else if (selectedCircle() && selectedCircle()!.status === 'Forming') {
+      <!-- FORMING CIRCLE HERO CARD -->
+      <section class="forming-circle-hero-card">
+        <div class="forming-content">
+          <span class="badge badge-warning">Forming Stage</span>
+          <h3 class="forming-title">{{ selectedCircle()!.name }}</h3>
+          <p class="forming-desc">
+            This circle is currently gathering members. The organizer must add members before starting the circle.
+          </p>
+          <div class="forming-meta-row">
+            <span>Contribution: <strong>{{ selectedCircle()!.contributionAmount | etbCurrency }}</strong></span>
+            <span>Frequency: <strong>{{ selectedCircle()!.meetingLabel }}</strong></span>
+            <span>Members: <strong>{{ selectedCircle()!.memberCount }}</strong></span>
+          </div>
+          <div class="forming-actions">
+            <a [routerLink]="['/circles', selectedCircle()!.id, 'members']" class="btn btn-primary">
+              Manage Members & Invitations
+            </a>
+            <a [routerLink]="['/circles', selectedCircle()!.id]" class="btn btn-outline">
+              Circle Overview
+            </a>
+          </div>
+        </div>
+      </section>
+    } @else {
+      <!-- NO ACTIVE CIRCLE EMPTY STATE -->
+      <section class="no-circle-hero-card">
+        <h3>No Active Ekub Circle</h3>
+        <p>You are not currently participating in an active savings round.</p>
+        <div class="no-circle-actions">
+          <a routerLink="/circles/create" class="btn btn-primary">
+            + Create a New Circle
+          </a>
+          <a routerLink="/circles" class="btn btn-outline">
+            Browse All Circles
+          </a>
+        </div>
+      </section>
+    }
+
+    <!-- ========================================================================= -->
+    <!-- SECONDARY SECTION: Overview & Navigation Cards                            -->
+    <!-- ========================================================================= -->
+    <section class="dashboard-secondary-grid">
+      <!-- Your Circles Switcher -->
+      <div class="secondary-panel circles-list-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">Your Circles ({{ circles().length }})</h4>
+          <a routerLink="/circles" class="panel-link">View all &rarr;</a>
+        </div>
+        <div class="circles-pill-list">
+          @for (c of circles(); track c.id) {
+            <button
+              class="circle-selector-item"
+              [class.active]="selectedCircle()?.id === c.id"
+              (click)="onSelectCircle(c)"
+            >
+              <div class="circle-item-info">
+                <span class="circle-item-name">{{ c.name }}</span>
+                <span class="circle-item-sub">{{ c.contributionAmount | etbCurrency }} • {{ c.meetingLabel }}</span>
+              </div>
+              <app-status-badge [status]="c.status"></app-status-badge>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Quick Action Shortcuts -->
+      <div class="secondary-panel quick-links-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">Quick Actions</h4>
+        </div>
+        <div class="shortcuts-grid">
+          @if (authService.isOrganizer()) {
+            <a routerLink="/circles/create" class="shortcut-card">
+              <span class="shortcut-icon">+</span>
+              <div class="shortcut-text">
+                <strong>Create Circle</strong>
+                <span>Form a new Ekub circle</span>
+              </div>
+            </a>
+          }
+          <a routerLink="/join-requests" class="shortcut-card">
+            <span class="shortcut-icon">✉</span>
+            <div class="shortcut-text">
+              <strong>Join Requests</strong>
+              <span>Invitations & pending roster requests</span>
             </div>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Right Column: Motivational Ethiopian Proverb Card -->
-    <div class="quote-card-col">
-      <div class="inspirational-card" (click)="nextProverb()" title="Click to view another Ethiopian proverb">
-        <div class="quote-top">
-          <div class="quote-mark">“</div>
-          <span class="proverb-badge">Wisdom</span>
-        </div>
-        
-        <div class="quote-texts">
-          <p class="quote-text">{{ currentProverb().text }}</p>
-          <p class="quote-amharic">{{ currentProverb().amharic }}</p>
-        </div>
-
-        <!-- Etched Floral Art Motif -->
-        <div class="quote-bottom-row">
-          <span class="quote-author">{{ currentProverb().author }}</span>
-          <div class="quote-flower-wrap">
-            <img src="assets/images/quote-flower.svg" alt="Ethiopian rose blossom" class="quote-flower-img" />
-          </div>
+          </a>
+          <a routerLink="/notifications" class="shortcut-card">
+            <span class="shortcut-icon">🔔</span>
+            <div class="shortcut-text">
+              <strong>Notifications</strong>
+              <span>Audit alerts and round updates</span>
+            </div>
+          </a>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  }
 </div>

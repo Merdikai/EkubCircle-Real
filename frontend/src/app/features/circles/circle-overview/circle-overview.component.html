@@ -105,9 +105,14 @@
           } @else {
             <div class="completed-banner">
               <p>🎉 This Ekub circle has successfully completed all rounds!</p>
-              <a [routerLink]="['/circles', circle()!.id, 'history']" class="btn btn-outline btn-sm">
-                View Payout History
-              </a>
+              <div class="completed-actions-row">
+                <a [routerLink]="['/circles', circle()!.id, 'summary']" class="btn btn-primary btn-sm">
+                  View Final Audit Report
+                </a>
+                <a [routerLink]="['/circles', circle()!.id, 'history']" class="btn btn-outline btn-sm">
+                  View Payout History
+                </a>
+              </div>
             </div>
           }
         </div>
@@ -145,6 +150,13 @@
             class="circle-nav-pill"
           >
             Contribution History & Payouts
+          </a>
+          <a
+            [routerLink]="['/circles', circle()!.id, 'summary']"
+            routerLinkActive="active"
+            class="circle-nav-pill"
+          >
+            Audit Summary Report
           </a>
         </div>
       </div>

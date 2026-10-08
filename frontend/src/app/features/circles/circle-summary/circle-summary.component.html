@@ -1,0 +1,132 @@
+<div class="circle-summary-page">
+  <!-- Top Bar Back Link -->
+  <div class="page-top-bar">
+    <a [routerLink]="['/circles', circleId()]" class="back-link">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      <span>Back to Circle</span>
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading circle summary and audit report...</p>
+    </div>
+  } @else if (summary()) {
+    <!-- Wireframe Screen 13: Completed Circle Card -->
+    <div class="summary-hero-card">
+      <div class="summary-hero-top">
+        <div class="title-meta">
+          <span class="meta-label">Audit & Final Summary Report</span>
+          <h2 class="circle-title">{{ summary()!.name }}</h2>
+        </div>
+        <div class="badge-group">
+          <app-status-badge [status]="summary()!.status"></app-status-badge>
+        </div>
+      </div>
+
+      <!-- Core Metrics Row -->
+      <div class="summary-stats-grid">
+        <div class="stat-box highlight-box">
+          <span class="stat-label">Total Pot Disbursed</span>
+          <h3 class="stat-value text-burgundy">{{ summary()!.totalPotDisbursed | etbCurrency }}</h3>
+          <span class="stat-sub">Across {{ summary()!.completedRoundsCount }} completed rounds</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-label">Total Members</span>
+          <h3 class="stat-value">{{ summary()!.totalMembers }}</h3>
+          <span class="stat-sub">Every member received pot once</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-label">Contribution / Round</span>
+          <h3 class="stat-value">{{ summary()!.contributionAmount | etbCurrency }}</h3>
+          <span class="stat-sub">{{ summary()!.meetingLabel }} frequency</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-label">Completed At</span>
+          <h3 class="stat-value">{{ (summary()!.completedAt | date:'mediumDate') || 'In Progress' }}</h3>
+          <span class="stat-sub">Started {{ summary()!.startedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wireframe Screen 13: Winner History List -->
+    <div class="summary-section-card">
+      <div class="section-card-header">
+        <h3 class="section-title">🏆 Winner History (Payout Recipients)</h3>
+        <span class="section-subtitle">Deterministic rotation verified by server</span>
+      </div>
+
+      <div class="winner-history-list">
+        @for (r of summary()!.rounds; track r.roundNumber) {
+          <div class="winner-row" [class.is-paid]="r.status === 'Paid Out' || r.status === 'PaidOut'">
+            <div class="winner-left">
+              <span class="round-number-pill">Round #{{ r.roundNumber }}</span>
+              <div class="winner-info">
+                <h4 class="winner-name">{{ r.receiverName }}</h4>
+                <span class="payout-date">
+                  @if (r.paidOutAt) {
+                    Disbursed on {{ r.paidOutAt | date:'mediumDate' }}
+                  } @else {
+                    Status: {{ r.status }}
+                  }
+                </span>
+              </div>
+            </div>
+            <div class="winner-right">
+              <span class="winner-amount font-bold text-burgundy">{{ r.potAmount | etbCurrency }}</span>
+              <app-status-badge [status]="r.status"></app-status-badge>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Member Audit & Contribution Summary Table -->
+    <div class="summary-section-card">
+      <div class="section-card-header">
+        <h3 class="section-title">📊 Member Contribution & Payout Audit</h3>
+        <span class="section-subtitle">Audit compliance checklist</span>
+      </div>
+
+      <div class="table-container">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Member Name</th>
+              <th>Email</th>
+              <th>Rounds Contributed</th>
+              <th>Pot Received</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of summary()!.members; track m.memberId) {
+              <tr>
+                <td><span class="order-badge">#{{ m.memberOrder }}</span></td>
+                <td class="font-bold">{{ m.fullName }}</td>
+                <td class="text-muted">{{ m.email }}</td>
+                <td>
+                  <span class="badge badge-completed">{{ m.totalContributionsPaid }} Contributions Paid</span>
+                </td>
+                <td>
+                  @if (m.hasReceived) {
+                    <span class="badge badge-success">✓ Received</span>
+                  } @else {
+                    <span class="badge badge-warning">Pending</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

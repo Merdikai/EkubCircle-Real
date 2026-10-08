@@ -22,12 +22,9 @@ export class SidebarComponent {
 
   navItems: NavItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard', exact: true },
-    { label: 'My Groups', route: '/circles', icon: 'groups' },
-    { label: 'Create Group', route: '/circles/create', icon: 'add_circle' },
-    { label: 'Contributions', route: '/circles/1/round', icon: 'payments' },
-    { label: 'Payouts', route: '/circles/1/history', icon: 'redeem' },
-    { label: 'Transactions', route: '/wallet', icon: 'receipt_long' },
-    { label: 'Profile', route: '/profile', icon: 'account_circle' },
-    { label: 'Settings', route: '/settings', icon: 'settings' }
+    { label: 'Ekub Circles', route: '/circles', icon: 'groups' },
+    { label: 'Create Circle', route: '/circles/create', icon: 'add_circle' },
+    { label: 'Join Requests', route: '/join-requests', icon: 'receipt_long' },
+    { label: 'Notifications', route: '/notifications', icon: 'redeem' }
   ];
 }
