@@ -35,3 +35,9 @@ coverage/
 # System files
 .DS_Store
 Thumbs.db
+
+# Playwright
+playwright/.auth/
+test-results/
+playwright-report/
+

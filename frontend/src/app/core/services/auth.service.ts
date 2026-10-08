@@ -149,25 +149,29 @@ export class AuthService {
     );
   }
 
+  setSession(user: User): AuthSession {
+    const normalizedUser: User = {
+      ...user,
+      role: this.normalizeRole(user.role)
+    };
+    const session: AuthSession = {
+      user: normalizedUser,
+      token: `demo-token-${user.id}`,
+      expiresAt: new Date(Date.now() + 86400000).toISOString()
+    };
+    this.sessionSignal.set(session);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } catch {}
+    return session;
+  }
+
   loginWithDemoUser(user: User): Observable<AuthSession> {
     const password = user.role?.toLowerCase() === 'admin' ? 'Admin123!' : 'Ekub123!';
     return this.loginApi({ email: user.email, password }).pipe(
       catchError(() => {
-        // Fallback offline mock session only if backend is not reachable
-        const normalizedUser: User = {
-          ...user,
-          role: this.normalizeRole(user.role)
-        };
-        const fallbackSession: AuthSession = {
-          user: normalizedUser,
-          token: `demo-token-${user.id}`,
-          expiresAt: new Date(Date.now() + 86400000).toISOString()
-        };
-        this.sessionSignal.set(fallbackSession);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackSession));
-        } catch {}
-        return of(fallbackSession);
+        const session = this.setSession(user);
+        return of(session);
       })
     );
   }
@@ -176,7 +180,7 @@ export class AuthService {
     const foundUser = DEMO_USERS.find(
       u => u.email.toLowerCase() === credentials.email.toLowerCase()
     ) || DEMO_USERS[0];
-    this.loginWithDemoUser(foundUser).subscribe();
+    this.setSession(foundUser);
     return true;
   }
 

@@ -271,6 +271,33 @@ powershell -ExecutionPolicy Bypass -File backend/test-api.ps1
 11. Circle join requests and organizer acceptance workflow
 12. In-app notification delivery and read status management
 
+### 5. Run Frontend Unit & Component Tests (Vitest — 19 Tests, 100% Green)
+Frontend unit, component, and HTTP mock tests are located in `frontend/src/` and run with Vitest:
+
+```bash
+cd frontend
+npm test
+```
+
+**Tested Areas:**
+- **Signal Inputs & Reactive State**: `StatCardComponent` and `ConfirmationModalComponent` testing `setInput()`, `whenStable()`, and output event subscriptions (`confirm`, `cancel`).
+- **Reactive Filtering & Router Isolation**: `CirclesListComponent` with `provideRouter([])`, `circles` signal, `activeFilter` signal, and `filteredCircles` computed signal.
+- **HTTP Mock Boundary**: `CircleService`, `PaymentService`, and `RoundService` with `provideHttpClientTesting()` and `HttpTestingController` asserting contract shapes, query params, and mutation payloads.
+
+### 6. Run Frontend E2E & Accessibility Tests (Playwright — 6 Tests, 100% Green)
+Full browser user journeys, authentication storage state reuse, API resilience, and WCAG 2.1 AA accessibility audits in `frontend/e2e/`:
+
+```bash
+cd frontend
+npx playwright test
+```
+
+**Tested Journeys:**
+- **Shared Authentication Setup (`auth.setup.ts`)**: Automated login saving persistent session storage state (`playwright/.auth/user.json`) so subsequent tests run authenticated without repeated form submissions.
+- **Dashboard & Circles User Journey (`circles-journey.spec.ts`)**: Authenticated navigation to dashboard and circles list, testing filter switching between Active, Forming, and All circles.
+- **API Failure & Resilience (`resilience.spec.ts`)**: Intercepts `/api/circles` with HTTP 500 (`ProblemDetails`) using `page.route` to verify graceful degradation without client crash.
+- **WCAG 2.1 AA Accessibility Audits (`accessibility.spec.ts`)**: Automated scanning with `@axe-core/playwright` across critical login and circles views enforcing zero critical/serious accessibility violations.
+
 ---
 
 ## 📡 API Endpoints Reference
