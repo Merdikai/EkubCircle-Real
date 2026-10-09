@@ -1,179 +1,266 @@
-# EkubCircle — Rotating Savings & Credit Associations Digital Ledger
+<div align="center">
+
+# 🌟 EkubCircle (ዕቁብ)
+### Next-Generation Rotating Savings & Credit Association (ROSCA) Digital Ledger
+
+[![.NET 10](https://img.shields.io/badge/.NET%2010-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/apps/aspnet)
+[![Angular 21](https://img.shields.io/badge/Angular-21.2%20Zoneless-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vitest](https://img.shields.io/badge/Vitest-19%20Specs%20Passed-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Playwright](https://img.shields.io/badge/Playwright-6%20E2E%20Passed-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![xUnit](https://img.shields.io/badge/xUnit-80%20Tests%20Passed-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://xunit.net/)
+[![Clean Architecture](https://img.shields.io/badge/Architecture-Onion%20%2B%20CQRS-blueviolet?style=for-the-badge)](#-architecture--design-patterns)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+
+<br/>
 
 **QIYAS Full-Stack Development Hackathon 2026 — Challenge 3: EkubCircle**
 
-EkubCircle is an audit-compliant, robust digital ledger for Ethiopian Rotating Savings and Credit Associations (Ekub / ዕቁብ). The backend is architected in ASP.NET Core with Entity Framework Core, SQLite, and an enterprise **Multi-Project Onion (Clean) Architecture** leveraging **MediatR (CQRS)** and **AutoMapper**.
+*Empowering community-driven financial solidarity through mathematical determinism, cryptographic fairness, and audit-grade immutability.*
+
+[Quickstart](#-quickstart-guide) • [Architecture](#-architecture--design-patterns) • [Server Rules](#-enforced-business-rules) • [Testing Suite](#-testing-pyramid--verification) • [Screens](#-wireframe-coverage) • [API Docs](#-api-specification)
+
+</div>
 
 ---
 
-## 👥 Team Information
+## 📖 Executive Summary
 
-- **Project**: EkubCircle
-- **Challenge**: Challenge 3 — EkubCircle
-- **Team**: EkubCircle Dev Team
-- **Roles**:
-  - Backend Architect & Engineer: ASP.NET Core, EF Core, CQRS with MediatR, Domain Engine, SQLite, REST API
-  - Frontend Developer: User Interface & Client Experience (Separately developed)
+**Ekub (ዕቁብ)** is Ethiopia's centuries-old peer-to-peer rotating savings and credit system. Groups of trusted participants pool regular contributions into a central pot that is awarded to one member each cycle until everyone has received the pot once.
+
+**EkubCircle** modernizes this cultural financial tradition into an enterprise-grade, audit-compliant digital platform. Built with **.NET 10 Onion Architecture**, **CQRS with MediatR**, **Entity Framework Core**, and **Angular 21 (Zoneless Signals)**, EkubCircle delivers 100% server-enforced integrity, real-time contribution tracking, cryptographically verified lottery draws, and complete transparency.
+
+> [!NOTE]
+> **Single Source of Truth**: All financial rules, contribution thresholds, member locks, and lottery eligibilities are rigorously enforced on the server side with composite database constraints and domain validations. The client UI acts purely as a reactive presentation layer.
 
 ---
 
-## 🏛️ Onion Architecture & Directory Tree
+## 👥 Hackathon Team & Project Info
 
-The backend strictly adheres to concentric architectural layers with dependency inversion where dependencies point strictly inward toward the core domain:
+| Attribute | Details |
+|---|---|
+| **Challenge** | Challenge 3 — EkubCircle Rotating Savings Ledger |
+| **Hackathon** | QIYAS Full-Stack Development Hackathon 2026 |
+| **Team Name** | EkubCircle Engineering Team |
+| **Target Audience** | Ethiopian savings groups, informal credit circles, cooperatives, and diaspora communities |
+| **Repository** | [github.com/Merdikai/EkubCircle-Real](https://github.com/Merdikai/EkubCircle-Real) |
 
-```
-backend/
-├── EkubCircle.sln
-├── src/
-│   ├── EkubCircle.Domain/                                 # Innermost Core Domain Layer
-│   │   ├── Entities/                                      # Domain Entities (Zero external dependencies)
-│   │   │   ├── User.cs                                    # Registered accounts (Admin, Organizer, Member) with Phone
-│   │   │   ├── Circle.cs                                  # Savings circle aggregate root (Frequency, MaxMembers, StartDate)
-│   │   │   ├── CircleMember.cs                            # Membership with deterministic order & HasWon status
-│   │   │   ├── Round.cs                                   # Rounds engine (DueDate, DrawnAt, WinnerMemberId)
-│   │   │   ├── Payment.cs                                 # Contribution ledger (Normal/Extra, ChanceCount, Status, IsLate)
-│   │   │   ├── JoinRequest.cs                             # Circle join requests & organizer invitations
-│   │   │   └── Notification.cs                            # In-app event notifications
-│   │   ├── Enums/                                         # Pure Domain Enums
-│   │   │   └── EkubEnums.cs                               # UserRole, CircleStatus, CircleFrequency, RoundStatus, PaymentType, JoinRequestStatus
-│   │   └── Exceptions/                                    # Domain Exceptions
-│   │       └── DomainExceptions.cs                        # DomainException, EkubRuleViolationException
-│   │
-│   ├── EkubCircle.Application/                             # Application / Use Cases Layer
-│   │   ├── Abstractions/                                  # Application Abstractions
-│   │   ├── Commands/                                      # CQRS State-Mutating Commands (MediatR IRequest)
-│   │   │   ├── Auth/                                      # RegisterUserCommand, LoginUserCommand
-│   │   │   ├── Circles/                                   # CreateCircleCommand, AddMemberCommand, RemoveMemberCommand, StartCircleCommand
-│   │   │   ├── Payments/                                  # RecordPaymentCommand (anti-duplicate, late tracking)
-│   │   │   ├── Rounds/                                    # ExecutePayoutCommand, DrawRoundWinnerCommand (Fair Draw)
-│   │   │   ├── JoinRequests/                              # CreateJoinRequestCommand, RespondJoinRequestCommand
-│   │   │   └── Notifications/                             # MarkNotificationAsReadCommand
-│   │   ├── Queries/                                       # CQRS Read Queries (MediatR IRequest)
-│   │   │   ├── Auth/                                      # GetCurrentUserQuery
-│   │   │   ├── Circles/                                   # GetUserCirclesQuery, GetCircleByIdQuery, GetCircleSummaryQuery
-│   │   │   ├── Payments/                                  # GetPaymentsQuery
-│   │   │   ├── Rounds/                                    # GetCurrentRoundQuery, GetCircleRoundsQuery
-│   │   │   ├── JoinRequests/                              # GetCircleJoinRequestsQuery, GetUserJoinRequestsQuery
-│   │   │   └── Notifications/                             # GetUserNotificationsQuery
-│   │   ├── Handlers/                                      # MediatR Command & Query Handlers
-│   │   │   ├── Auth/                                      # RegisterUserCommandHandler, LoginUserCommandHandler, etc.
-│   │   │   ├── Circles/                                   # CreateCircleCommandHandler, AddMemberCommandHandler, etc.
-│   │   │   ├── Payments/                                  # RecordPaymentCommandHandler, GetPaymentsQueryHandler
-│   │   │   ├── Rounds/                                    # ExecutePayoutCommandHandler, DrawRoundWinnerCommandHandler, etc.
-│   │   │   ├── JoinRequests/                              # CreateJoinRequestCommandHandler, RespondJoinRequestCommandHandler, etc.
-│   │   │   └── Notifications/                             # MarkNotificationAsReadCommandHandler, GetUserNotificationsQueryHandler
-│   │   ├── Common/                                        # Common Interfaces & Mappings
-│   │   │   ├── Interfaces/                                # IEkubDbContext, ITokenService, IPasswordHasher, IJwtTokenGenerator
-│   │   │   └── Mappings/                                  # AutoMapper Profile (MappingProfile)
-│   │   └── DTOs/                                          # Data Transfer Objects
-│   │       ├── Auth/                                      # Register, Login, User, AuthResponse DTOs
-│   │       ├── Circles/                                   # CreateCircle, AddMember, CircleDto, CircleSummaryDto
-│   │       ├── Payments/                                  # RecordPayment, PaymentDto
-│   │       ├── Rounds/                                    # CurrentRoundDto, PayoutResultDto, DrawWinnerDto
-│   │       ├── JoinRequests/                              # CreateJoinRequestDto, RespondJoinRequestDto, JoinRequestDto
-│   │       └── Notifications/                             # NotificationDto
-│   │
-│   ├── EkubCircle.Infrastructure/                          # Outermost Infrastructure Layer
-│   │   ├── Identity/                                      # Security & Token implementations
-│   │   │   ├── TokenService.cs                            # HMAC-SHA256 JWT Token Generation
-│   │   │   └── PasswordHasher.cs                          # BCrypt-compatible PBKDF2 Password Hashing
-│   │   ├── Persistence/                                   # Data Access & Database Configurations
-│   │   │   ├── Context/                                   # EF Core DbContext & Factory
-│   │   │   │   ├── EkubDbContext.cs                       # Implements IEkubDbContext (7 DbSets)
-│   │   │   │   └── EkubDbContextFactory.cs                # Design-time factory for EF Core migrations
-│   │   │   ├── Configurations/                            # Fluent Entity Configurations & Constraints
-│   │   │   │   ├── UserConfiguration.cs                   # Email unique constraint, Phone
-│   │   │   │   ├── CircleConfiguration.cs                 # Decimal precision, Frequency, MaxMembers, StartDate
-│   │   │   │   ├── CircleMemberConfiguration.cs           # UNIQUE(CircleId, UserId)
-│   │   │   │   ├── RoundConfiguration.cs                  # UNIQUE(CircleId, RoundNumber), WinnerMemberId
-│   │   │   │   ├── PaymentConfiguration.cs                # UNIQUE(RoundId, CircleMemberId, PaymentType), ChanceCount, Status
-│   │   │   │   ├── JoinRequestConfiguration.cs            # Circle, RequestedUser, RequestedByUser FKs & Indexes
-│   │   │   │   └── NotificationConfiguration.cs           # User FK, (UserId, IsRead) Index
-│   │   │   └── SeedData/                                  # Deterministic Seed Data
-│   │   │       └── DbInitializer.cs                       # Seeds Users, Circles, Members, Rounds, Payments, JoinRequests, Notifications
-│   │
-│   └── EkubCircle.API/                                     # Presentation Layer (Thin Web API Controllers)
-│       ├── Controllers/                                   # Thin API Controllers (Inject ONLY ISender & IMapper)
-│       │   ├── AuthController.cs                          # /api/auth
-│       │   ├── CirclesController.cs                       # /api/circles
-│       │   ├── RoundsController.cs                        # /api/rounds
-│       │   ├── PaymentsController.cs                      # /api/payments
-│       │   ├── JoinRequestsController.cs                  # /api/join-requests
-│       │   └── NotificationsController.cs                 # /api/notifications
-│       ├── Middlewares/                                   # Global Middlewares
-│       │   └── ExceptionMiddleware.cs                     # Converts DomainExceptions to standardized HTTP 400/404/500 JSON
-│       └── Program.cs                                     # Dependency Injection Composition Root & Swagger
-└── test-api.ps1                                           # 12-Suite Automated Verification Suite
+---
+
+## 🏛️ Architecture & Design Patterns
+
+The solution is architected as an enterprise **Multi-Project Onion (Clean) Architecture**. Dependencies point strictly inward toward the core domain, ensuring complete decoupling from persistence, web frameworks, and third-party libraries.
+
+```mermaid
+graph TD
+    UI[Angular 21 Client Application] -->|HTTP / REST| API[EkubCircle.API - Presentation Layer]
+    API -->|Commands & Queries| APP[EkubCircle.Application - Use Cases]
+    INFRA[EkubCircle.Infrastructure - Persistence & Identity] -->|Implements Interfaces| APP
+    APP -->|Domain Entities & Exceptions| DOM[EkubCircle.Domain - Core Business Entities]
+    
+    subgraph "Core Domain (Zero Dependencies)"
+        DOM
+    end
+    subgraph "Application Core"
+        APP
+    end
+    subgraph "External Adapters"
+        INFRA
+        API
+    end
 ```
 
-> **Design Pattern Enforcement**: All controllers adhere to strict Clean Architecture rules: they inject **only `ISender` (MediatR)** and **`IMapper` (AutoMapper)**. No controllers perform business logic or touch entity repositories directly.
+### 📁 Directory Structure
+
+```text
+EkubCircle - Real/
+├── backend/
+│   ├── EkubCircle.sln
+│   ├── src/
+│   │   ├── EkubCircle.Domain/                  # Core Layer: Pure entities, enums, exceptions
+│   │   │   ├── Entities/                       # User, Circle, CircleMember, Round, Payment, JoinRequest, Notification
+│   │   │   ├── Enums/                          # UserRole, CircleStatus, CircleFrequency, RoundStatus, PaymentType
+│   │   │   └── Exceptions/                     # DomainException, EkubRuleViolationException
+│   │   ├── EkubCircle.Application/             # Use Cases Layer: CQRS commands, queries, validators, handlers
+│   │   │   ├── Commands/                       # Auth, Circles, Payments, Rounds, JoinRequests, Notifications
+│   │   │   ├── Queries/                        # Read models, summaries, audit lookups
+│   │   │   ├── Handlers/                       # MediatR request handlers
+│   │   │   ├── Common/Services/                # EkubCalculationService (pot totals, timeliness, lottery weights)
+│   │   │   └── DTOs/                           # Data Transfer Objects & AutoMapper profiles
+│   │   ├── EkubCircle.Infrastructure/          # Data Access & Identity Layer
+│   │   │   ├── Persistence/Context/            # EkubDbContext (EF Core with SQLite & PostgreSQL support)
+│   │   │   ├── Persistence/Configurations/     # Fluent API configurations with unique composite constraints
+│   │   │   ├── Identity/                       # TokenService (HMAC-SHA256 JWT) & PasswordHasher (PBKDF2)
+│   │   │   └── SeedData/                       # Deterministic database seeder (DbInitializer)
+│   │   └── EkubCircle.API/                     # Presentation Web API: Thin controllers injecting only ISender & IMapper
+│   │       ├── Controllers/                    # Auth, Circles, Rounds, Payments, JoinRequests, Notifications
+│   │       ├── Middlewares/                    # Global ExceptionMiddleware (RFC 7807 ProblemDetails)
+│   │       └── Program.cs                      # Composition Root & Swagger configuration
+│   ├── tests/
+│   │   └── EkubCircle.Tests/                   # Automated .NET 10 Test Suite (80 Tests)
+│   │       ├── Unit/Services/                  # Pure calculation fact & theory boundary tests
+│   │       ├── Unit/Handlers/                  # NSubstitute command handler isolation specs
+│   │       ├── Integration/                    # WebApplicationFactory end-to-end API pipeline tests
+│   │       └── Common/                         # CustomWebApplicationFactory with in-memory SQLite
+│   └── test-api.ps1                            # 12-Suite Live API Verification Script
+│
+├── frontend/                                   # Modern Angular 21 Single-Page Application
+│   ├── e2e/                                    # Full-Browser Playwright E2E Suite (6 Tests)
+│   │   ├── auth.setup.ts                       # Shared storageState authentication setup
+│   │   ├── circles-journey.spec.ts             # Dashboard & circles filter user journey
+│   │   ├── resilience.spec.ts                  # API 500 error interception & recovery
+│   │   └── accessibility.spec.ts               # WCAG 2.1 AA AxeBuilder accessibility audits
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/                           # Guards, HTTP interceptors, services, models
+│   │   │   ├── features/                       # Auth, Dashboard, Circles, Members, Rounds, Payments
+│   │   │   ├── layout/                         # AppShell, Topbar, Sidebar, MobileNavigation
+│   │   │   └── shared/                         # StatCard, ConfirmationModal, StatusBadge, Toast, Pipes
+│   │   └── styles.css                          # Ethiopian cultural theme tokens & responsive styles
+│   └── playwright.config.ts                    # Playwright multi-project runner configuration
+└── README.md
+```
 
 ---
 
-## 📊 Complete Database Schema & ER Diagram Alignment
+## 🔒 Enforced Business Rules
 
-The database schema directly implements the official Eraser ER diagram in full across 4 distinct modules:
+EkubCircle operates under **7 Immutable Server-Side Rules** that guarantee financial fairness, tamper-proof audit trails, and strict operational integrity:
 
-### 1. Core: Identity (Checkpoint 1)
-- **`Users`**: `Id` (PK), `FullName` / `Name`, `Email` (UNIQUE), `Phone`, `PasswordHash`, `Role` (User, Admin, Organizer, Member), `CreatedAt`
+| # | Business Rule | Enforcement Mechanism | Failure Response |
+|:---:|:---|:---|:---:|
+| **1** | **Roster Lock on Start** | Circle members can only join or leave during `Forming` status. Starting the circle locks the roster permanently. | `HTTP 400 Bad Request` |
+| **2** | **Deterministic Round Generation** | When a circle starts, exactly $N$ rounds are pre-generated for $N$ members with deterministic dates. | Database constraint & Handler |
+| **3** | **One Winner per Round** | Each round allows exactly one winner/receiver. Multiple payouts for a single round are rejected. | `UNIQUE(CircleId, RoundNumber)` |
+| **4** | **100% Contribution Gate** | A pot **cannot** be paid out until 100% of registered circle members have fulfilled their payment for that round. | `HTTP 400 Bad Request` |
+| **5** | **Single Pot Receipt Rule** | A member can receive the pot at most once during a circle's complete lifecycle (`HasWon` / `HasReceived` flag). | `HTTP 400 Bad Request` |
+| **6** | **Ongoing Payment Obligation** | Members who have already received their payout must continue contributing in all subsequent rounds. | Server validation engine |
+| **7** | **Zero Duplicate Payments** | Composite index prevents members from paying multiple times for the same round. | `UNIQUE(RoundId, CircleMemberId, Type)` |
 
-### 2. Core: Circles and Rounds (Checkpoint 1)
-- **`Circles`**: `Id` (PK), `Name`, `ContributionAmount`, `Frequency` (Weekly, Monthly), `MaxMembers`, `Status` (Draft, Forming, Active, Completed), `StartDate`, `CompletedAt`, `CreatedByUserId` (FK), `CreatedAt`
-- **`CircleMembers`**: `Id` (PK), `CircleId` (FK), `UserId` (FK), `MemberOrder`, `RoleInCircle` (Organizer, Member), `HasReceived` / `HasWon` (Boolean), `JoinedAt` (Constraint: `UNIQUE(CircleId, UserId)`)
-- **`Rounds`**: `Id` (PK), `CircleId` (FK), `RoundNumber`, `DueDate`, `PotAmount`, `Status` (Open, Drawn, Closed, PaidOut), `DrawnAt`, `WinnerMemberId` (FK nullable -> CircleMembers.Id) (Constraint: `UNIQUE(CircleId, RoundNumber)`)
+### 🔄 Circle Lifecycle State Machine
 
-### 3. Supporting: Payments (Normal / Extra)
-- **`Payments`**: `Id` (PK), `RoundId` (FK), `CircleMemberId` (FK), `Amount`, `PaymentType` (Normal, Extra), `ChanceCount`, `Status` (Pending, Paid, Failed), `PaymentMethod`, `Notes`, `IsLate` (Boolean), `PaidAt`, `RecordedByUserId` (FK) (Constraint: `UNIQUE(RoundId, CircleMemberId, PaymentType)`)
-
-### 4. Extensions: Join Requests and Notifications
-- **`JoinRequests`**: `Id` (PK), `CircleId` (FK), `RequestedUserId` (FK), `RequestedByUserId` (FK), `Status` (Pending, Accepted, Rejected, Cancelled), `Message`, `CreatedAt`, `RespondedAt`
-- **`Notifications`**: `Id` (PK), `UserId` (FK), `Type`, `Title`, `Message`, `RelatedEntityId`, `IsRead` (Boolean), `CreatedAt`, `ReadAt`
+```mermaid
+stateDiagram-v2
+    [*] --> Forming: Organizer Creates Circle
+    Forming --> Forming: Add Members / Review Join Requests
+    Forming --> Active: POST /api/circles/{id}/start (Roster Locked)
+    
+    state Active {
+        [*] --> RoundOpen: Open Round N
+        RoundOpen --> Collecting: Members Submit Contributions
+        Collecting --> GateCheck: Verify 100% Payment Gate
+        GateCheck --> EligibleForDraw: Unpaid Members Disqualified
+        EligibleForDraw --> DrawWinner: Optional Fair Lottery Draw
+        DrawWinner --> PayoutPot: Execute Payout Disbursement
+        PayoutPot --> NextRound: Has Next Round?
+        NextRound --> RoundOpen: N = N + 1
+    }
+    
+    NextRound --> Completed: All N Rounds Paid Out
+    Completed --> [*]: Audit Summary Generated
+```
 
 ---
 
-## 🔒 The 7 Core Server-Side Hard Rules Enforced
+## 🌟 Innovation & Competitive Highlights
 
-The API acts as the single source of truth and strictly enforces all business rules on the server side:
+### 🎲 1. Cryptographically Fair Lottery Draw Simulator (`POST /api/rounds/{roundId}/draw`)
+- Uses .NET `RandomNumberGenerator` for cryptographically secure, non-deterministic random selection.
+- **Strict Ineligibility Filtering**: Unpaid members and members who have already won a pot in prior rounds are strictly disqualified from the candidate pool.
+- Audit records store the candidate pool size, timestamp (`DrawnAt`), and winning member ID.
 
-1. **Member List Locks on Start**: Circle members can only be added or removed when the circle is in `Draft` / `Forming` status. Once `POST /api/circles/{id}/start` is called, status switches to `Active` and member roster modifications or new join requests are rejected (`HTTP 400 Bad Request`).
-2. **Deterministic Payout Order**: Payout order ($1..N$) is locked deterministically at circle start based on member sequence. The system pre-assigns the receiver for each round.
-3. **Exactly One Receiver / Winner per Round**: Each round has an assigned `WinnerMemberId` / `ReceiverMemberId` that cannot be duplicated or bypassed.
-4. **100% Member Contribution Gate**: Payout cannot occur until every registered member of the circle has paid their contribution for that round (`HTTP 400 Bad Request` if any member is unpaid).
-5. **Single Pot Receipt Rule**: A member can receive the pot at most once (`HasWon` / `HasReceived` flag). The server rejects payouts if a member already received a pot.
-6. **Ongoing Payment Obligation**: Members who have already received their payout must continue contributing in all subsequent rounds.
-7. **Duplicate Payment Prevention**: Composite database index `UNIQUE(RoundId, CircleMemberId, PaymentType)` and handler validation prevent duplicate contributions for the same round (`HTTP 400 Bad Request`).
+### 📊 2. Completed Circle Audit & Performance Summary (`GET /api/circles/{id}/summary`)
+- Generates a full audit trail including total pot disbursed, rotation timelines, completed round counts, and individual member performance metrics (on-time vs. late payment ratio).
+
+### ⏱️ 3. Payment Timeliness & Grace Period Classification
+- Every contribution captures timestamp and an `IsLate` flag.
+- Enables organizers to track member creditworthiness and financial reliability without punitive fee collection.
+
+### ✉️ 4. Self-Service Join Requests & Organizer Approval Workflow
+- Public/forming circles allow prospective members to submit join requests with custom introductory messages.
+- Organizers review, accept, or decline requests. Acceptance automatically registers the member into the circle roster.
+
+### 🔔 5. Real-Time In-App Audit Notifications
+- Automated notifications dispatched upon payment confirmation, round payout advancement, invitation arrival, and status updates.
 
 ---
 
-## 🌟 Innovation & Extra Credit Features (Criterion 5: 10 pts)
+## 🧪 Testing Pyramid & Verification
 
-1. **Server-Side Cryptographically Fair Draw Simulator (`POST /api/rounds/{roundId}/draw`)**:
-   - Uses `RandomNumberGenerator` for cryptographically strong, non-deterministic random selection.
-   - **Strict Rule Enforcement**: Only members who have **paid** for the round AND **have not yet won** a pot are eligible. Unpaid members are strictly disqualified from winning.
-   - Automatically records `DrawnAt` and assigns the chosen member as `WinnerMemberId`.
+EkubCircle features complete, multi-tiered test coverage across the full stack:
 
-2. **Completed-Circle Summary & Audit Report (`GET /api/circles/{id}/summary`)**:
-   - Comprehensive audit endpoint for completed or active circles.
-   - Calculates total pot collected, payout timelines, on-time vs. late contribution breakdown per member, and payout history.
+```
+              ┌────────────────────────┐
+              │     Playwright E2E     │  6 Tests (Full Browser Journeys & A11y)
+              ├────────────────────────┤
+              │      Vitest Specs      │  19 Tests (Angular Signals & HTTP Mocks)
+              ├────────────────────────┤
+              │ WebApplicationFactory  │  Integration Tests (.NET HTTP Pipeline)
+              ├────────────────────────┤
+              │  xUnit Unit & Theories │  80 Tests (Pure Domain & Handler Mocks)
+              └────────────────────────┘
+```
 
-3. **Late Contributor Flag & Audit Tracking (`IsLate`)**:
-   - Payments track an `IsLate` boolean flag.
-   - Enables organizers to audit timely payments vs late payments across all rounds.
+### 1. Backend Testing Suite (.NET 10 — 80 Tests, 100% Green)
 
-4. **Self-Service Join Requests & Organizer Workflow**:
-   - Prospective members can browse forming circles and submit join requests (`POST /api/join-requests`).
-   - Organizers can review pending requests (`GET /api/join-requests/circle/{id}`) and accept/reject them (`PUT /api/join-requests/{id}/respond`).
-   - Accepted requests automatically add the user to the `CircleMembers` roster and notify both parties.
+The backend test suite adheres to the enterprise testing pyramid:
 
-5. **Integrated In-App Notification System**:
-   - Real-time audit trail of user notifications (`GET /api/notifications`, `PUT /api/notifications/{id}/read`) for join request status, invitations, payments, and payouts.
+```powershell
+dotnet test backend/EkubCircle.sln --no-build
+```
+
+- **Tier 1: Pure Domain Logic & Theory Tests (`EkubCalculationServiceTests.cs`)**:
+  - Tests zero, negative, and large pot edge cases.
+  - Parameterized `[Theory]` tests for timeliness (on-time, exact deadline boundary, within grace period, late).
+  - Net payout deductions and lottery ticket weight distribution.
+- **Tier 2: MediatR Handler Boundary Isolation**:
+  - Validates command handlers using `NSubstitute` mocks, asserting exact `Received(1)` and `DidNotReceive()` interactions.
+- **Tier 3: In-Memory Integration Server (`CustomWebApplicationFactory.cs`)**:
+  - Boots ASP.NET Core with isolated in-memory SQLite and test JWT tokens.
+  - Executes full HTTP pipeline tests against `Auth`, `Circles`, and `Rounds` endpoints.
+
+### 2. Frontend Unit & Component Suite (Vitest — 19 Tests, 100% Green)
+
+Runs modern Angular zoneless signal testing and HTTP client mock verifications:
+
+```powershell
+cd frontend
+npm test
+```
+
+- **Signal Inputs & Reactive Rendering**: `StatCardComponent` and `ConfirmationModalComponent` testing `setInput()`, `whenStable()`, and output event subscriptions (`confirm`, `cancel`).
+- **Router Isolation & Computed Signals**: `CirclesListComponent` with `provideRouter([])`, `circles` signal, `activeFilter` signal, and `filteredCircles` computed signal.
+- **HTTP Mock Boundary**: `CircleService`, `PaymentService`, and `RoundService` with `provideHttpClientTesting()` and `HttpTestingController` asserting contract shapes, query params, and mutation payloads.
+
+### 3. Frontend End-to-End & Accessibility Suite (Playwright — 6 Tests, 100% Green)
+
+Runs real browser automation across multi-project setup with shared authentication:
+
+```powershell
+cd frontend
+npx playwright test
+```
+
+- **Shared Auth Setup (`auth.setup.ts`)**: Reusable login storing session state to `playwright/.auth/user.json` to skip re-authentication in subsequent tests.
+- **Happy-Path Journey (`circles-journey.spec.ts`)**: Validates authenticated dashboard rendering, circle navigation, and status filter switching (`All`, `Active`, `Forming`).
+- **API Failure Resilience (`resilience.spec.ts`)**: Intercepts `/api/circles` with HTTP 500 (`ProblemDetails`) via `page.route` to ensure graceful error handling without client crash.
+- **WCAG 2.1 AA Accessibility Audits (`accessibility.spec.ts`)**: Automated scans using `@axe-core/playwright` ensuring zero critical or serious accessibility violations.
+
+### 4. Automated 12-Suite Live API Verification Script
+
+A comprehensive end-to-end PowerShell script testing the running server across all business rules:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend/test-api.ps1
+```
 
 ---
 
 ## 👥 Seeded Demo Accounts (for Judges & Testing)
 
 | Role | Email | Password | Full Name | Phone |
-|---|---|---|---|---|
+|:---|:---|:---|:---|:---|
 | **System Admin** | `admin@hackathon.local` | `Admin123!` | Hackathon Admin | `+251911000000` |
 | **Organizer** | `organizer@ekub.local` | `Ekub123!` | Abebe Bikila (Circle Organizer) | `+251911111111` |
 | **Member 1** | `member1@ekub.local` | `Ekub123!` | Hana Girma | `+251911222222` |
@@ -183,148 +270,85 @@ The API acts as the single source of truth and strictly enforces all business ru
 
 ---
 
-## ⚙️ Configuration & Database Setup
-
-The backend automatically supports both **SQLite (zero-setup default)** and **PostgreSQL**:
-- By default, `appsettings.json` connects to local SQLite (`ekubcircle.db`), requiring zero external database configuration.
-- To use PostgreSQL, copy `backend/src/EkubCircle.API/appsettings.Development.example.json` to `appsettings.Development.json` (or use `.env.example` as a template) and configure your connection string:
-  ```json
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=ekubcircle_db;Username=postgres;Password=your_password_here"
-  }
-  ```
-  *(Note: All credentials, passwords, and `.env` / `appsettings.*.json` files are protected and excluded by `.gitignore`)*.
-
----
-
-## 🚀 Running the Project
+## 🚀 Quickstart Guide
 
 ### Prerequisites
 - [.NET 9 / .NET 10 SDK](https://dotnet.microsoft.com/)
 - [Node.js v20+ & npm](https://nodejs.org/)
 
-### 1. Build & Run the Backend API
+### 1. Start the Backend API
 ```powershell
-dotnet build backend/EkubCircle.sln
 dotnet run --project backend/src/EkubCircle.API/EkubCircle.API.csproj --urls "http://localhost:5000"
 ```
+- **API Base URL**: `http://localhost:5000`
+- **Swagger Documentation**: `http://localhost:5000/swagger`
 
-- **Swagger UI**: Accessible at `http://localhost:5000/` or `http://localhost:5000/swagger`
-- **CORS**: Configured with `AllowAll` for local frontend development servers.
-
-### 2. Run the Angular Frontend
+### 2. Start the Frontend Application
+In a separate terminal:
 ```powershell
 cd frontend
 npm install
 npm start
 ```
-- **App URL**: `http://localhost:4200/` (proxied to API at `http://localhost:5000`)
+- **Web Application URL**: `http://localhost:4200`
+- *(Requests to `/api` are automatically proxied to the backend on port 5000 via `proxy.conf.json`)*
+
+### 3. Database Options (SQLite by Default)
+- **Zero-Setup Default**: Uses local SQLite (`ekubcircle.db`), created and seeded automatically on first run.
+- **PostgreSQL (Optional)**: Copy `backend/src/EkubCircle.API/appsettings.Development.example.json` to `appsettings.Development.json` and configure your connection string:
+  ```json
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ekubcircle_db;Username=postgres;Password=your_password_here"
+  }
+  ```
+  *(Note: All credentials, passwords, and `.env` files are strictly excluded from git tracking by `.gitignore`)*.
 
 ---
 
-## 📱 Frontend Screens & Wireframe Coverage (100% Wireframe Alignment)
+## 📱 Wireframe Coverage
 
-| Screen | Route | Role / Purpose | Wireframe Mapping |
-|---|---|---|---|
-| **Login & Register** | `/login` | Authentication with 6 pre-seeded judging accounts (Admin, Organizer, Members 1–4). | Screen 1 |
-| **Member Home Ledger** | `/dashboard` | Primary member dashboard showing active round, current receiver, pot so far, **PAID/UNPAID** badge with 1-click contribution, and **YES/NO** pot receipt flag. | Screen 6 |
-| **Create Circle** | `/circles/create` | Organizer sets circle name, contribution in Birr, and meeting frequency label. | Screen 2 |
-| **Forming Circle & Members** | `/circles/:id/members` | Add members by email, review join requests, remove members during forming stage. | Screen 3 |
-| **Start Circle Modal** | `/circles/:id` | Irreversible start confirmation: locks member list, fixes deterministic payout order, generates rounds. | Screen 4 |
-| **Join Requests & Invites** | `/join-requests` | Organizers invite users by email; members review and accept/decline incoming invitations. | Screen 5 |
-| **Current Round (Member & Organizer)** | `/circles/:id/round` | Live pot collection progress, member payment checklist, **Fair Draw Simulator**, and 100% contribution payout disbursement. | Screens 7, 8, 9, 10 |
-| **Round & Winner History** | `/circles/:id/history` | Historical audit of member contributions, late payment indicators, and completed payout rounds. | Screen 11 |
-| **Audit Notifications** | `/notifications` | Live event audit trail of invitations, contributions, round starts, and pot disbursements. | Screen 12 |
-| **Completed Circle Summary** | `/circles/:id/summary` | Completed circle audit report displaying total pot disbursed, rotation history, and member audit metrics. | Screen 13 |
+The frontend faithfully implements 100% of the challenge wireframes:
 
-
-### 3. Run the Automated Backend Tests (80 Tests, 100% Green)
-Adhering to enterprise .NET 10 testing pyramid architecture (unit tests, boundary theories, NSubstitute mocks, and `WebApplicationFactory` API integration tests):
-
-```powershell
-dotnet test backend/tests/EkubCircle.Tests/EkubCircle.Tests.csproj --no-build
-```
-
-**Testing Pyramid Architecture:**
-- **Tier 1 (Pure Domain Logic)**: `EkubCalculationServiceTests` with `[Fact]` and parameterized `[Theory]` boundary tests (testing zero, negative, deadline edges, grace period cutoffs, and draw ticket calculations).
-- **Tier 2 (Boundary Mocking)**: Command handler tests using `NSubstitute` asserting exact `Received(1)` and `DidNotReceive()` interactions across validation branches.
-- **Tier 3 (HTTP Pipeline Integration)**: `CustomWebApplicationFactory<Program>` in-memory test server running integration suites (`AuthApiIntegrationTests`, `CirclesApiIntegrationTests`, `RoundsApiIntegrationTests`) asserting HTTP status codes and contract shapes.
-
-### 4. Run the 12-Suite Automated Live API Verification Test
-We provide an automated PowerShell test suite verifying all 7 server-side rules, innovation features, join requests, and notifications end-to-end:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File backend/test-api.ps1
-```
-
-**Verified Test Cases:**
-1. Authentication & JWT profile retrieval
-2. Circle creation & member invitations
-3. Circle start & deterministic round generation
-4. Server rejection of member additions after circle start (`HTTP 400`)
-5. Round state & pot calculation engine
-6. 100% member contribution gate (`HTTP 400` on premature payout attempt)
-7. Payment recording & duplicate contribution rejection (`HTTP 400`)
-8. Payout disbursement, round advancement, and duplicate payout rejection (`HTTP 400`)
-9. Server-side fair draw simulator (verifying unpaid members cannot win)
-10. Circle completion audit report generation
-11. Circle join requests and organizer acceptance workflow
-12. In-app notification delivery and read status management
-
-### 5. Run Frontend Unit & Component Tests (Vitest — 19 Tests, 100% Green)
-Frontend unit, component, and HTTP mock tests are located in `frontend/src/` and run with Vitest:
-
-```bash
-cd frontend
-npm test
-```
-
-**Tested Areas:**
-- **Signal Inputs & Reactive State**: `StatCardComponent` and `ConfirmationModalComponent` testing `setInput()`, `whenStable()`, and output event subscriptions (`confirm`, `cancel`).
-- **Reactive Filtering & Router Isolation**: `CirclesListComponent` with `provideRouter([])`, `circles` signal, `activeFilter` signal, and `filteredCircles` computed signal.
-- **HTTP Mock Boundary**: `CircleService`, `PaymentService`, and `RoundService` with `provideHttpClientTesting()` and `HttpTestingController` asserting contract shapes, query params, and mutation payloads.
-
-### 6. Run Frontend E2E & Accessibility Tests (Playwright — 6 Tests, 100% Green)
-Full browser user journeys, authentication storage state reuse, API resilience, and WCAG 2.1 AA accessibility audits in `frontend/e2e/`:
-
-```bash
-cd frontend
-npx playwright test
-```
-
-**Tested Journeys:**
-- **Shared Authentication Setup (`auth.setup.ts`)**: Automated login saving persistent session storage state (`playwright/.auth/user.json`) so subsequent tests run authenticated without repeated form submissions.
-- **Dashboard & Circles User Journey (`circles-journey.spec.ts`)**: Authenticated navigation to dashboard and circles list, testing filter switching between Active, Forming, and All circles.
-- **API Failure & Resilience (`resilience.spec.ts`)**: Intercepts `/api/circles` with HTTP 500 (`ProblemDetails`) using `page.route` to verify graceful degradation without client crash.
-- **WCAG 2.1 AA Accessibility Audits (`accessibility.spec.ts`)**: Automated scanning with `@axe-core/playwright` across critical login and circles views enforcing zero critical/serious accessibility violations.
+| Screen | Route | Purpose & Capabilities | Wireframe Alignment |
+|:---|:---|:---|:---:|
+| **Authentication** | `/login` | Sign-in and registration with 1-click persona quick-switcher for judges. | **Screen 1** |
+| **Circle Creation** | `/circles/create` | Organizer sets circle name, contribution in Birr, and meeting frequency label. | **Screen 2** |
+| **Forming Circle & Roster** | `/circles/:id/members` | Add members by email, review incoming requests, remove members during forming stage. | **Screen 3** |
+| **Start Circle Modal** | `/circles/:id` | Irreversible confirmation: locks member list, fixes deterministic payout order, generates rounds. | **Screen 4** |
+| **Join Requests & Invites** | `/join-requests` | Self-service membership requests and organizer invitation management. | **Screen 5** |
+| **Member Home Ledger** | `/dashboard` | Primary dashboard: active round, current receiver, pot so far, **PAID/UNPAID** badge with 1-click contribution, and **YES/NO** pot receipt flag. | **Screen 6** |
+| **Current Round Status** | `/circles/:id/round` | Live pot progress, member payment checklist, **Fair Draw Simulator**, and payout execution. | **Screens 7–10** |
+| **Round & Winner History** | `/circles/:id/history` | Historical audit of member contributions, late payment indicators, and completed payout rounds. | **Screen 11** |
+| **Audit Notifications** | `/notifications` | Live event audit trail of invitations, contributions, round starts, and pot disbursements. | **Screen 12** |
+| **Completed Circle Summary** | `/circles/:id/summary` | Completed circle audit report displaying total pot disbursed, rotation history, and member metrics. | **Screen 13** |
 
 ---
 
-## 📡 API Endpoints Reference
+## 📡 API Specification
 
 ### Authentication (`/api/auth`)
-- `POST /api/auth/register` — Register a new account
-- `POST /api/auth/login` — Log in and receive a JWT Bearer token
+- `POST /api/auth/register` — Register a new account (Member / Organizer / Admin)
+- `POST /api/auth/login` — Authenticate and receive an HMAC-SHA256 JWT Bearer token
 - `GET /api/auth/me` — Retrieve current authenticated user profile
 
 ### Circles (`/api/circles`)
 - `POST /api/circles` — Create a new circle (creator assigned as Organizer)
 - `GET /api/circles` — List user's circles (`?status=draft|forming|active|completed`)
-- `GET /api/circles/{id}` — Get circle details, members list, and round status
-- `POST /api/circles/{id}/members` — Add member by email (Organizer only, Forming only)
-- `DELETE /api/circles/{id}/members/{memberId}` — Remove member (Organizer only, Forming only)
-- `POST /api/circles/{id}/start` — Lock member list, assign deterministic payout order, generate rounds
+- `GET /api/circles/{id}` — Get circle details, members roster, and active round status
+- `POST /api/circles/{id}/members` — Add member by email (Forming stage only)
+- `DELETE /api/circles/{id}/members/{memberId}` — Remove member (Forming stage only)
+- `POST /api/circles/{id}/start` — Lock roster, assign deterministic payout order, generate rounds
 - `GET /api/circles/{id}/summary` — Completed-circle audit report and member metrics
 
 ### Rounds (`/api/rounds`)
-- `GET /api/rounds/current?circleId={id}` — Current open round details, receiver info, member checklist, pot calculation
-- `GET /api/rounds?circleId={id}` — List all rounds and payout statuses
+- `GET /api/circles/{id}/rounds/current` — Current open round details, receiver info, member checklist, pot calculation
+- `GET /api/circles/{id}/rounds` — List all rounds and payout statuses
 - `POST /api/rounds/{roundId}/payout` — Execute pot payout (enforces 100% payment gate & single receipt rule)
-- `POST /api/rounds/{roundId}/draw` — Server-side cryptographically fair draw simulator
+- `POST /api/rounds/{roundId}/draw` — Cryptographically fair draw simulator (disqualifies unpaid members)
 
 ### Payments (`/api/payments`)
 - `POST /api/payments` — Record member contribution (prevents duplicate payments, supports `IsLate` flag)
-- `GET /api/payments?circleId={id}&roundId={id}` — Audit trail of payments
+- `GET /api/payments?circleId={id}&roundId={id}` — Audit trail of contributions
 
 ### Join Requests (`/api/join-requests`)
 - `POST /api/join-requests` — Submit request to join a circle or invite a user
@@ -335,3 +359,9 @@ npx playwright test
 ### Notifications (`/api/notifications`)
 - `GET /api/notifications` — Get current user's notifications (`?unreadOnly=true|false`)
 - `PUT /api/notifications/{id}/read` — Mark notification as read
+
+---
+
+## 📄 License & Attribution
+
+This project is licensed under the **MIT License**. Developed for the **QIYAS Full-Stack Development Hackathon 2026** to showcase modern software engineering best practices applied to traditional Ethiopian community finance.
