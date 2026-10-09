@@ -1,25 +1,81 @@
-# .NET Build outputs
+# ==============================================================================
+# EkubCircle — Backend (.NET 10 / C# / EF Core) .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Build Results & Binaries
+# ------------------------------------------------------------------------------
 [Bb]in/
 [Oo]bj/
-[Ll]og/
-[Ll]ogs/
-TestResults/
+[Aa]rms/
+[Aa]rm64/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+dist/
+
+# ------------------------------------------------------------------------------
+# Test Results & Code Coverage
+# ------------------------------------------------------------------------------
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+coverage/
+*.cdb
+*.rpt
+
+# ------------------------------------------------------------------------------
+# IDEs & Editor Configuration
+# ------------------------------------------------------------------------------
+.vs/
+.idea/
 *.user
+*.userosscache
 *.suo
 *.userprefs
 *.sln.docstates
-.vs/
+*.DotSettings.user
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# SQLite databases
+# ------------------------------------------------------------------------------
+# Database Files & SQLite
+# ------------------------------------------------------------------------------
 *.db
 *.db-shm
 *.db-wal
 *.sqlite
 *.sqlite3
 
-# Secrets and local configurations
-appsettings.Production.json
-appsettings.Local.json
+# ------------------------------------------------------------------------------
+# Environment Variables & Secret Configuration Files
+# (Do NOT commit real database credentials or production keys!)
+# ------------------------------------------------------------------------------
 .env
 .env.*
 !.env.example
+appsettings.Production.json
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+!appsettings.Development.example.json
+!appsettings.example.json
+
+# ------------------------------------------------------------------------------
+# Logs & Temporary Files
+# ------------------------------------------------------------------------------
+[Ll]og/
+[Ll]ogs/
+*.log
+*.tmp
+*~
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
